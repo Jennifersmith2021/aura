@@ -1,0 +1,23 @@
+
+import { useStore } from "@/hooks/useStore";
+
+// This script is intended to be run in the browser console or via a temporary component
+// since it uses the client-side store hook.
+// However, since I can't run browser console scripts easily, I will create a temporary 
+// "Seeder" component that I can visit to populate the store.
+
+// Actually, I can just use the browser subagent to execute JavaScript that interacts with the store 
+// if the store is exposed to the window, OR I can just use the "Add Manual Expense" form 
+// I created earlier to add items! 
+// But the "Add Manual Expense" form in BudgetTracker sets category to "other" by default 
+// and only allows "clothing" or "makeup" type. It doesn't let me set specific categories like "top".
+
+// So, I will modify the BudgetTracker temporarily to allow setting specific categories 
+// OR I will create a temporary page/component to seed data.
+// A temporary component is cleaner.
+
+// Wait, I can just use the `AmazonImport` logic? No, that also has specific logic.
+// The easiest way is to create a temporary button in `FittingRoom.tsx` that adds test items.
+// This is a "dev tool" approach.
+
+// Let's modify `FittingRoom.tsx` to include a "Seed Test Data" button during development.

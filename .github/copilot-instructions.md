@@ -1,0 +1,22 @@
+```markdown
+# Aura — AI Agent Guide
+
+- Quick commands: `npm install`; `npm run dev`; `npm run build` / `npm start`; `npm run lint`; `npm run test:e2e` (Playwright). DB: `docker-compose up -d` then `npx prisma db push` (optional). Seed: `npm run prisma:seed`.
+- Architecture: Next.js 16 App Router + React 19 + Tailwind v4 (`src/app` pages + API). Client state lives in `src/hooks/useStore.ts` persisted to IndexedDB (`idb-keyval`). Types centralized in `src/types/index.ts`. Optional server sync via Prisma (`prisma/schema.prisma`) and `/api/sync/items`.
+- Conventions: always use `@/` alias; client comps with hooks start with `"use client"`; prefer `lucide-react` icons and `clsx`; keep types only in `src/types/index.ts` and mirror store methods. Avoid adding new relative import chains.
+- Data persistence keys (IndexedDB): `items`, `looks`, `measurements`, `timeline`, `routines`, `shoppingItems`, `shoppingLists`, `inspiration`, `colorSeason`, `chastitySessions`, `corsetSessions`, `orgasmLogs`, `arousalLogs`, `toyCollection`, `intimacyJournal`, `skincareProducts`, `clitMeasurements`, `wigCollection`, `hairStyles`, `sissyGoals`, `sissyLogs`, `compliments`, `packingLists`, `challenges`, `achievements`, `affirmations`, `dailyAffirmation`, `progressPhotos`. Mutations follow pattern: update state, then `set(<key>, next)`. Measurements, timeline, and logs are kept sorted desc by date in the hook.
+- Core types (see `src/types/index.ts`): `Item` (clothing|makeup with `Category`), `Look`, `MeasurementLog` (with goalWaist/goalWHR tracking), `TimelineEntry`, `Routine/RoutineStep`, `ShoppingItem` (retailer/category enums incl. adult), `ShoppingList`, `Inspiration`, `ColorSeason`, `ChastitySession` (with cageModel/ringSize), `CorsetSession` (with waistBefore/waistCorseted/waistAfter/corsetType), `OrgasmLog` (with method/chastityStatus).
+- Store API highlights (`useStore`): add/remove/update for items, looks, routines, shopping items/lists; `toggleWishlist(id)` toggles wishlist flag; `setSeason`; `addInspiration/removeInspiration`; chastity (`lock/unlock/logHygiene`) with cageModel/ringSize fields, corset tracking (`startCorsetSession/endCorsetSession`), orgasm tracking (`addOrgasmLog/removeOrgasmLog`). Respect existing sort/wishlist patterns when adding mutations.
+- AI endpoints:
+  - `/api/gemini` (`src/app/api/gemini/route.ts`): `type` = `text` | `json` | `image`. API key from `x-google-api-key` (dev) or `GOOGLE_API_KEY` (env). `text` builds persona prompt with optional `context` and `weather`; `json` expects raw JSON (no markdown); `image` uses `@/lib/imageGenerator` fallback to placeholder.
+  - `/api/shopping` (`src/app/api/shopping/route.ts`): `type=search` uses 60s in-memory cache; prefers local adapter when `USE_LOCAL_RETAILER_ADAPTER=true` (`RETAILER_ADAPTER_URL`, default http://localhost:8001); otherwise Gemini 1.5 Flash. Accepts `page`/`limit`; filters adult unless `includeAdult` or `x-user-consent: true` (see `src/utils/contentPolicy.ts`). `type=recommendations` returns JSON object; also filters adult categories.
+- Retailer adapter (`api-adapter/adapter.py`): FastAPI bridge to `amazon-mcp`. Start with `uvicorn api-adapter.adapter:app --reload --port 8001`. Enable via env vars above.
+- CSV import + heuristics: `src/utils/amazonParser.ts` maps Amazon CSV rows to `Item` with type/category inference; `test-amazon-parser.ts`/`.mjs` scripts exist. Makeup expiration helpers in `src/utils/expiration.ts` with exact statuses `good|warning|expired` used by UI/tests.
+- Styling/layout: mobile-first, container `max-w-md`; Tailwind semantic tokens (`bg-background`, `text-foreground`, etc.); Framer Motion for transitions; `Navigation.tsx` provides 7-route bottom tab (home, closet, shopping, studio, fitting-room, stylist, vanity).
+- Testing: Playwright specs in `tests/` (navigation, shopping flows); unit tests under `tests/unit/` for parser/expiration/sync. Typecheck manually with `npx tsc --noEmit` if needed. No CI present.
+- DB sync: `/api/sync/items` upserts Prisma `Item` model; if you add server fields update `prisma/schema.prisma` + `@/lib/prisma` usage and advise running `npx prisma db push`.
+- First steps for new features: update `src/types/index.ts` → mirror in `useStore` (persist with matching key) → adjust components/hooks. For AI prompts, send minimal item context `{ name, type, category, color }` to reduce tokens. Keep adult-consent checks (`isAdultCategory`, `x-user-consent`) intact when surfacing adult products.
+```
+
+
+- Important conventions (do not change unless asked):

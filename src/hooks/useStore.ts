@@ -1,0 +1,711 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { get, set, del } from "idb-keyval";
+import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle } from "@/types";
+
+
+export function useStore() {
+    const [items, setItems] = useState<Item[]>([]);
+    const [looks, setLooks] = useState<Look[]>([]);
+    const [measurements, setMeasurements] = useState<MeasurementLog[]>([]);
+    const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
+    const [routines, setRoutines] = useState<Routine[]>([]);
+    const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
+    const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+    const [inspiration, setInspiration] = useState<Inspiration[]>([]);
+    const [colorSeason, setColorSeason] = useState<ColorSeason | null>(null);
+
+    const [chastitySessions, setChastitySessions] = useState<ChastitySession[]>([]);
+    const [corsetSessions, setCorsetSessions] = useState<CorsetSession[]>([]);
+    const [orgasmLogs, setOrgasmLogs] = useState<OrgasmLog[]>([]);
+    const [arousalLogs, setArousalLogs] = useState<ArousalLog[]>([]);
+    const [toyCollection, setToyCollection] = useState<ToyItem[]>([]);
+    const [intimacyJournal, setIntimacyJournal] = useState<IntimacyEntry[]>([]);
+    const [skincareProducts, setSkincareProducts] = useState<SkincareProduct[]>([]);
+    const [clitMeasurements, setClitMeasurements] = useState<ClitMeasurement[]>([]);
+    const [wigCollection, setWigCollection] = useState<WigItem[]>([]);
+    const [hairStyles, setHairStyles] = useState<HairStyle[]>([]);
+    const [sissyGoals, setSissyGoals] = useState<SissyTrainingGoal[]>([]);
+    const [sissyLogs, setSissyLogs] = useState<SissyTrainingLog[]>([]);
+    const [compliments, setCompliments] = useState<ComplimentEntry[]>([]);
+    const [packingLists, setPackingLists] = useState<PackingList[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Load initial data
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists] = await Promise.all([
+                    get<Item[]>("items"),
+                    get<Look[]>("looks"),
+                    get<MeasurementLog[]>("measurements"),
+                    get<TimelineEntry[]>("timeline"),
+                    get<Routine[]>("routines"),
+                    get<ShoppingItem[]>("shoppingItems"),
+                    get<ShoppingList[]>("shoppingLists"),
+                    get<Inspiration[]>("inspiration"),
+                    get<ColorSeason | null>("colorSeason"),
+                    get<ChastitySession[]>("chastitySessions"),
+                    get<CorsetSession[]>("corsetSessions"),
+                    get<OrgasmLog[]>("orgasmLogs"),
+                    get<ArousalLog[]>("arousalLogs"),
+                    get<ToyItem[]>("toyCollection"),
+                    get<IntimacyEntry[]>("intimacyJournal"),
+                    get<SkincareProduct[]>("skincareProducts"),
+                    get<ClitMeasurement[]>("clitMeasurements"),
+                    get<WigItem[]>("wigCollection"),
+                    get<HairStyle[]>("hairStyles"),
+                    get<SissyTrainingGoal[]>("sissyGoals"),
+                    get<SissyTrainingLog[]>("sissyLogs"),
+                    get<ComplimentEntry[]>("compliments"),
+                    get<PackingList[]>("packingLists"),
+                ]);
+
+                if (storedItems) setItems(storedItems);
+                if (storedLooks) setLooks(storedLooks);
+                if (storedMeasurements) setMeasurements(storedMeasurements);
+                if (storedTimeline) setTimeline(storedTimeline);
+                if (storedRoutines) setRoutines(storedRoutines);
+                if (storedShoppingItems) setShoppingItems(storedShoppingItems);
+                if (storedShoppingLists) setShoppingLists(storedShoppingLists);
+                if (storedInspiration) setInspiration(storedInspiration);
+                if (storedColorSeason) setColorSeason(storedColorSeason);
+                if (storedChastitySessions) setChastitySessions(storedChastitySessions);
+                if (storedCorsetSessions) setCorsetSessions(storedCorsetSessions);
+                if (storedOrgasmLogs) setOrgasmLogs(storedOrgasmLogs);
+                if (storedArousalLogs) setArousalLogs(storedArousalLogs);
+                if (storedToyCollection) setToyCollection(storedToyCollection);
+                if (storedIntimacyJournal) setIntimacyJournal(storedIntimacyJournal);
+                if (storedSkincareProducts) setSkincareProducts(storedSkincareProducts);
+                if (storedClitMeasurements) setClitMeasurements(storedClitMeasurements);
+                if (storedWigCollection) setWigCollection(storedWigCollection);
+                if (storedHairStyles) setHairStyles(storedHairStyles);
+                if (storedSissyGoals) setSissyGoals(storedSissyGoals);
+                if (storedSissyLogs) setSissyLogs(storedSissyLogs);
+                if (storedCompliments) setCompliments(storedCompliments);
+                if (storedPackingLists) setPackingLists(storedPackingLists);
+            } catch (err) {
+                console.error("Failed to load data", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    // Items
+    const addItem = useCallback(async (item: Item) => {
+        setItems((prev) => {
+            const next = [...prev, item];
+            set("items", next);
+            return next;
+        });
+    }, []);
+
+    const removeItem = useCallback(async (id: string) => {
+        setItems((prev) => {
+            const next = prev.filter((i) => i.id !== id);
+            set("items", next);
+            return next;
+        });
+    }, []);
+
+    const updateItem = useCallback(async (updated: Item) => {
+        setItems((prev) => {
+            const next = prev.map((i) => (i.id === updated.id ? updated : i));
+            set("items", next);
+            return next;
+        });
+    }, []);
+
+    // Looks
+    const addLook = useCallback(async (look: Look) => {
+        setLooks((prev) => {
+            const next = [...prev, look];
+            set("looks", next);
+            return next;
+        });
+    }, []);
+
+    const removeLook = useCallback(async (id: string) => {
+        setLooks((prev) => {
+            const next = prev.filter((l) => l.id !== id);
+            set("looks", next);
+            return next;
+        });
+    }, []);
+
+    // Measurements
+    const addMeasurement = useCallback(async (log: MeasurementLog) => {
+        setMeasurements((prev) => {
+            const next = [...prev, log].sort((a, b) => b.date - a.date);
+            set("measurements", next);
+            return next;
+        });
+    }, []);
+
+    // Timeline
+    const addTimelineEntry = useCallback(async (entry: TimelineEntry) => {
+        setTimeline((prev) => {
+            const next = [...prev, entry].sort((a, b) => b.date - a.date);
+            set("timeline", next);
+            return next;
+        });
+    }, []);
+
+    // Routines
+    const addRoutine = useCallback(async (routine: Routine) => {
+        setRoutines((prev) => {
+            const next = [...prev, routine];
+            set("routines", next);
+            return next;
+        });
+    }, []);
+
+    const removeRoutine = useCallback(async (id: string) => {
+        setRoutines((prev) => {
+            const next = prev.filter((r) => r.id !== id);
+            set("routines", next);
+            return next;
+        });
+    }, []);
+
+    const updateRoutine = useCallback(async (updated: Routine) => {
+        setRoutines((prev) => {
+            const next = prev.map((r) => (r.id === updated.id ? updated : r));
+            set("routines", next);
+            return next;
+        });
+    }, []);
+
+    // Shopping Items
+    const addShoppingItem = useCallback(async (item: ShoppingItem) => {
+        setShoppingItems((prev) => {
+            const next = [...prev, item];
+            set("shoppingItems", next);
+            return next;
+        });
+    }, []);
+
+    const removeShoppingItem = useCallback(async (id: string) => {
+        setShoppingItems((prev) => {
+            const next = prev.filter((i) => i.id !== id);
+            set("shoppingItems", next);
+            return next;
+        });
+    }, []);
+
+    const updateShoppingItem = useCallback(async (updated: ShoppingItem) => {
+        setShoppingItems((prev) => {
+            const next = prev.map((i) => (i.id === updated.id ? updated : i));
+            set("shoppingItems", next);
+            return next;
+        });
+    }, []);
+
+    const toggleWishlist = useCallback(async (id: string) => {
+        setShoppingItems((prev) => {
+            const next = prev.map((i) =>
+                i.id === id ? { ...i, inWishlist: !i.inWishlist } : i
+            );
+            set("shoppingItems", next);
+            return next;
+        });
+    }, []);
+
+    // Shopping Lists
+    const addShoppingList = useCallback(async (list: ShoppingList) => {
+        setShoppingLists((prev) => {
+            const next = [...prev, list];
+            set("shoppingLists", next);
+            return next;
+        });
+    }, []);
+
+    const removeShoppingList = useCallback(async (id: string) => {
+        setShoppingLists((prev) => {
+            const next = prev.filter((l) => l.id !== id);
+            set("shoppingLists", next);
+            return next;
+        });
+    }, []);
+
+    const updateShoppingList = useCallback(async (updated: ShoppingList) => {
+        setShoppingLists((prev) => {
+            const next = prev.map((l) => (l.id === updated.id ? updated : l));
+            set("shoppingLists", next);
+            return next;
+        });
+    }, []);
+
+    // Inspiration
+    const addInspiration = useCallback(async (entry: Inspiration) => {
+        setInspiration((prev) => {
+            const next = [...prev, entry];
+            set("inspiration", next);
+            return next;
+        });
+    }, []);
+
+    const removeInspiration = useCallback(async (id: string) => {
+        setInspiration((prev) => {
+            const next = prev.filter((i) => i.id !== id);
+            set("inspiration", next);
+            return next;
+        });
+    }, []);
+
+    // Color Season
+    const setSeason = useCallback(async (season: ColorSeason | null) => {
+        setColorSeason(season);
+        set("colorSeason", season);
+    }, []);
+
+    // Chastity Tracker
+    const lock = useCallback(async (session: ChastitySession) => {
+        setChastitySessions((prev) => {
+            const next = [...prev, session];
+            set("chastitySessions", next);
+            return next;
+        });
+    }, []);
+
+    const unlock = useCallback(async (id: string, note?: string) => {
+        setChastitySessions((prev) => {
+            const next = prev.map(s =>
+                s.id === id ? { ...s, endDate: Date.now(), note: note || s.note } : s
+            );
+            set("chastitySessions", next);
+            return next;
+        });
+    }, []);
+
+    const logHygiene = useCallback(async (sessionId: string) => {
+        setChastitySessions((prev) => {
+            const next = prev.map(s =>
+                s.id === sessionId ? { ...s, hygieneChecks: [...(s.hygieneChecks || []), Date.now()] } : s
+            );
+            set("chastitySessions", next);
+            return next;
+        });
+    }, []);
+
+    // Corset Tracker
+    const startCorsetSession = useCallback(async (session: CorsetSession) => {
+        setCorsetSessions((prev) => {
+            const next = [...prev, session];
+            set("corsetSessions", next);
+            return next;
+        });
+    }, []);
+
+    const endCorsetSession = useCallback(async (id: string, waistAfter?: number, note?: string) => {
+        setCorsetSessions((prev) => {
+            const next = prev.map(s =>
+                s.id === id ? { ...s, endDate: Date.now(), waistAfter, note: note || s.note } : s
+            );
+            set("corsetSessions", next);
+            return next;
+        });
+    }, []);
+
+    // Orgasm Tracker
+    const addOrgasmLog = useCallback(async (log: OrgasmLog) => {
+        setOrgasmLogs((prev) => {
+            const next = [...prev, log].sort((a, b) => b.date - a.date);
+            set("orgasmLogs", next);
+            return next;
+        });
+    }, []);
+
+    const removeOrgasmLog = useCallback(async (id: string) => {
+        setOrgasmLogs((prev) => {
+            const next = prev.filter((l) => l.id !== id);
+            set("orgasmLogs", next);
+            return next;
+        });
+    }, []);
+
+    // Arousal Tracker
+    const addArousalLog = useCallback(async (log: ArousalLog) => {
+        setArousalLogs((prev) => {
+            const next = [...prev, log].sort((a, b) => b.date - a.date);
+            set("arousalLogs", next);
+            return next;
+        });
+    }, []);
+
+    const removeArousalLog = useCallback(async (id: string) => {
+        setArousalLogs((prev) => {
+            const next = prev.filter((l) => l.id !== id);
+            set("arousalLogs", next);
+            return next;
+        });
+    }, []);
+
+    // Toy Collection
+    const addToy = useCallback(async (toy: ToyItem) => {
+        setToyCollection((prev) => {
+            const next = [...prev, toy];
+            set("toyCollection", next);
+            return next;
+        });
+    }, []);
+
+    const removeToy = useCallback(async (id: string) => {
+        setToyCollection((prev) => {
+            const next = prev.filter((t) => t.id !== id);
+            set("toyCollection", next);
+            return next;
+        });
+    }, []);
+
+    const updateToy = useCallback(async (id: string, updates: Partial<ToyItem>) => {
+        setToyCollection((prev) => {
+            const next = prev.map((t) => (t.id === id ? { ...t, ...updates } : t));
+            set("toyCollection", next);
+            return next;
+        });
+    }, []);
+
+    const logToyCleaning = useCallback(async (id: string) => {
+        setToyCollection((prev) => {
+            const next = prev.map((t) => (t.id === id ? { ...t, lastCleaning: Date.now() } : t));
+            set("toyCollection", next);
+            return next;
+        });
+    }, []);
+
+    // Intimacy Journal
+    const addIntimacyEntry = useCallback(async (entry: IntimacyEntry) => {
+        setIntimacyJournal((prev) => {
+            const next = [...prev, entry].sort((a, b) => b.date - a.date);
+            set("intimacyJournal", next);
+            return next;
+        });
+    }, []);
+
+    const removeIntimacyEntry = useCallback(async (id: string) => {
+        setIntimacyJournal((prev) => {
+            const next = prev.filter((e) => e.id !== id);
+            set("intimacyJournal", next);
+            return next;
+        });
+    }, []);
+
+    const updateIntimacyEntry = useCallback(async (id: string, updates: Partial<IntimacyEntry>) => {
+        setIntimacyJournal((prev) => {
+            const next = prev.map((e) => (e.id === id ? { ...e, ...updates } : e)).sort((a, b) => b.date - a.date);
+            set("intimacyJournal", next);
+            return next;
+        });
+    }, []);
+
+    // Skincare Products
+    const addSkincareProduct = useCallback(async (product: SkincareProduct) => {
+        setSkincareProducts((prev) => {
+            const next = [...prev, product].sort((a, b) => a.order - b.order);
+            set("skincareProducts", next);
+            return next;
+        });
+    }, []);
+
+    const removeSkincareProduct = useCallback(async (id: string) => {
+        setSkincareProducts((prev) => {
+            const next = prev.filter((p) => p.id !== id);
+            set("skincareProducts", next);
+            return next;
+        });
+    }, []);
+
+    const updateSkincareProduct = useCallback(async (id: string, updates: Partial<SkincareProduct>) => {
+        setSkincareProducts((prev) => {
+            const next = prev.map((p) => (p.id === id ? { ...p, ...updates } : p)).sort((a, b) => a.order - b.order);
+            set("skincareProducts", next);
+            return next;
+        });
+    }, []);
+
+    // Clit Measurements
+    const addClitMeasurement = useCallback(async (measurement: ClitMeasurement) => {
+        setClitMeasurements((prev) => {
+            const next = [...prev, measurement].sort((a, b) => b.date - a.date);
+            set("clitMeasurements", next);
+            return next;
+        });
+    }, []);
+
+    const removeClitMeasurement = useCallback(async (id: string) => {
+        setClitMeasurements((prev) => {
+            const next = prev.filter((m) => m.id !== id);
+            set("clitMeasurements", next);
+            return next;
+        });
+    }, []);
+
+    // Wig Collection
+    const addWig = useCallback(async (wig: WigItem) => {
+        setWigCollection((prev) => {
+            const next = [...prev, wig];
+            set("wigCollection", next);
+            return next;
+        });
+    }, []);
+
+    const removeWig = useCallback(async (id: string) => {
+        setWigCollection((prev) => {
+            const next = prev.filter((w) => w.id !== id);
+            set("wigCollection", next);
+            return next;
+        });
+    }, []);
+
+    const updateWig = useCallback(async (id: string, updates: Partial<WigItem>) => {
+        setWigCollection((prev) => {
+            const next = prev.map((w) => (w.id === id ? { ...w, ...updates } : w));
+            set("wigCollection", next);
+            return next;
+        });
+    }, []);
+
+    // Hair Styles
+    const addHairStyle = useCallback(async (style: HairStyle) => {
+        setHairStyles((prev) => {
+            const next = [...prev, style].sort((a, b) => b.date - a.date);
+            set("hairStyles", next);
+            return next;
+        });
+    }, []);
+
+    const removeHairStyle = useCallback(async (id: string) => {
+        setHairStyles((prev) => {
+            const next = prev.filter((s) => s.id !== id);
+            set("hairStyles", next);
+            return next;
+        });
+    }, []);
+
+    const updateHairStyle = useCallback(async (id: string, updates: Partial<HairStyle>) => {
+        setHairStyles((prev) => {
+            const next = prev.map((s) => (s.id === id ? { ...s, ...updates } : s)).sort((a, b) => b.date - a.date);
+            set("hairStyles", next);
+            return next;
+        });
+    }, []);
+
+    // Sissy Training Goals
+    const addSissyGoal = useCallback(async (goal: SissyTrainingGoal) => {
+        setSissyGoals((prev) => {
+            const next = [...prev, goal];
+            set("sissyGoals", next);
+            return next;
+        });
+    }, []);
+
+    const removeSissyGoal = useCallback(async (id: string) => {
+        setSissyGoals((prev) => {
+            const next = prev.filter((g) => g.id !== id);
+            set("sissyGoals", next);
+            return next;
+        });
+    }, []);
+
+    const updateSissyGoal = useCallback(async (id: string, updates: Partial<SissyTrainingGoal>) => {
+        setSissyGoals((prev) => {
+            const next = prev.map((g) => (g.id === id ? { ...g, ...updates } : g));
+            set("sissyGoals", next);
+            return next;
+        });
+    }, []);
+
+    const toggleSissyGoalComplete = useCallback(async (id: string) => {
+        setSissyGoals((prev) => {
+            const goal = prev.find((g) => g.id === id);
+            if (!goal) return prev;
+            const next = prev.map((g) =>
+                g.id === id
+                    ? {
+                          ...g,
+                          completed: !g.completed,
+                          completedDate: !g.completed ? Date.now() : undefined,
+                          progress: !g.completed ? 100 : g.progress,
+                      }
+                    : g
+            );
+            set("sissyGoals", next);
+            return next;
+        });
+    }, []);
+
+    // Sissy Training Logs
+    const addSissyLog = useCallback(async (log: SissyTrainingLog) => {
+        setSissyLogs((prev) => {
+            const next = [...prev, log].sort((a, b) => b.date - a.date);
+            set("sissyLogs", next);
+            return next;
+        });
+    }, []);
+
+    const removeSissyLog = useCallback(async (id: string) => {
+        setSissyLogs((prev) => {
+            const next = prev.filter((l) => l.id !== id);
+            set("sissyLogs", next);
+            return next;
+        });
+    }, []);
+
+    const updateSissyLog = useCallback(async (id: string, updates: Partial<SissyTrainingLog>) => {
+        setSissyLogs((prev) => {
+            const next = prev.map((l) => (l.id === id ? { ...l, ...updates } : l)).sort((a, b) => b.date - a.date);
+            set("sissyLogs", next);
+            return next;
+        });
+    }, []);
+
+    // Compliment Journal
+    const addCompliment = useCallback(async (compliment: ComplimentEntry) => {
+        setCompliments((prev) => {
+            const next = [...prev, compliment].sort((a, b) => b.date - a.date);
+            set("compliments", next);
+            return next;
+        });
+    }, []);
+
+    const removeCompliment = useCallback(async (id: string) => {
+        setCompliments((prev) => {
+            const next = prev.filter((c) => c.id !== id);
+            set("compliments", next);
+            return next;
+        });
+    }, []);
+
+    const updateCompliment = useCallback(async (id: string, updates: Partial<ComplimentEntry>) => {
+        setCompliments((prev) => {
+            const next = prev.map((c) => (c.id === id ? { ...c, ...updates } : c)).sort((a, b) => b.date - a.date);
+            set("compliments", next);
+            return next;
+        });
+    }, []);
+
+    const toggleComplimentFavorite = useCallback(async (id: string) => {
+        setCompliments((prev) => {
+            const next = prev.map((c) => (c.id === id ? { ...c, favorite: !c.favorite } : c));
+            set("compliments", next);
+            return next;
+        });
+    }, []);
+
+    // Packing Lists
+    const addPackingList = useCallback(async (list: PackingList) => {
+        setPackingLists((prev) => {
+            const next = [...prev, list].sort((a, b) => b.startDate - a.startDate);
+            set("packingLists", next);
+            return next;
+        });
+    }, []);
+
+    const removePackingList = useCallback(async (id: string) => {
+        setPackingLists((prev) => {
+            const next = prev.filter((l) => l.id !== id);
+            set("packingLists", next);
+            return next;
+        });
+    }, []);
+
+    const updatePackingList = useCallback(async (id: string, updates: Partial<PackingList>) => {
+        setPackingLists((prev) => {
+            const next = prev.map((l) => (l.id === id ? { ...l, ...updates } : l)).sort((a, b) => b.startDate - a.startDate);
+            set("packingLists", next);
+            return next;
+        });
+    }, []);
+
+    return {
+        loading,
+        items,
+        looks,
+        measurements,
+        timeline,
+        routines,
+        shoppingItems,
+        shoppingLists,
+        inspiration,
+        colorSeason,
+        chastitySessions,
+        corsetSessions,
+        orgasmLogs,
+        arousalLogs,
+        toyCollection,
+        intimacyJournal,
+        skincareProducts,
+        clitMeasurements,
+        wigCollection,
+        hairStyles,
+        addItem,
+        removeItem,
+        updateItem,
+        addLook,
+        removeLook,
+        addMeasurement,
+        addTimelineEntry,
+        addRoutine,
+        removeRoutine,
+        updateRoutine,
+        addShoppingItem,
+        removeShoppingItem,
+        updateShoppingItem,
+        toggleWishlist,
+        addShoppingList,
+        removeShoppingList,
+        updateShoppingList,
+        addInspiration,
+        removeInspiration,
+        setSeason,
+        lock,
+        unlock,
+        logHygiene,
+        startCorsetSession,
+        endCorsetSession,
+        addOrgasmLog,
+        removeOrgasmLog,
+        addArousalLog,
+        removeArousalLog,
+        addToy,
+        removeToy,
+        updateToy,
+        logToyCleaning,
+        addIntimacyEntry,
+        removeIntimacyEntry,
+        updateIntimacyEntry,
+        addSkincareProduct,
+        removeSkincareProduct,
+        updateSkincareProduct,
+        addClitMeasurement,
+        removeClitMeasurement,
+        addWig,
+        removeWig,
+        updateWig,
+        addHairStyle,
+        removeHairStyle,
+        updateHairStyle,
+        sissyGoals,
+        addSissyGoal,
+        removeSissyGoal,
+        updateSissyGoal,
+        toggleSissyGoalComplete,
+        sissyLogs,
+        addSissyLog,
+        removeSissyLog,
+        updateSissyLog,
+        compliments,
+        addCompliment,
+        removeCompliment,
+        updateCompliment,
+        toggleComplimentFavorite,
+        packingLists,
+        addPackingList,
+        removePackingList,
+        updatePackingList,
+    };
+}

@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = "postgresql://dummy:dummy@localhost:5432/dummy"
+}
+
+// Enums
+enum ItemStatus {
+  ACTIVE
+  ARCHIVED
+  DONATED
+  TRASHED
+}
+
+enum Season {
+  SPRING
+  SUMMER
+  AUTUMN
+  WINTER
+  ALL
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+}
+
+// Models
+
+model Item {
+  id           String   @id @default(uuid())
+  name         String
+  category     String
+  subCategory  String?
+  color        String?
+  season       Season   @default(ALL)
+  brand        String?
+  size         String?
+  purchaseDate DateTime?
+  price        Float?
+  image        String?
+  notes        String?
+  tags         String[]
+  status       ItemStatus @default(ACTIVE)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  looks        Look[]   @relation("LookItems")
+}
+
+model Look {
+  id        String   @id @default(uuid())
+  name      String
+  date      DateTime @default(now())
+  notes     String?
+  rating    Int?
+  occasion  String?
+  image     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items     Item[]   @relation("LookItems")
+}
+
+model Measurement {
+  id        String   @id @default(uuid())
+  date      DateTime @default(now())
+  bust      Float?
+  waist     Float?
+  hips      Float?
+  weight    Float?
+  notes     String?
+  
+  createdAt DateTime @default(now())
+}
+
+model TimelineEntry {
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  title       String
+  description String?
+  type        String   // e.g., "milestone", "medical", "social"
+  image       String?
+  
+  createdAt   DateTime @default(now())
+}
+
+model ChastitySession {
+  id          String        @id @default(uuid())
+  startDate   DateTime      @default(now())
+  endDate     DateTime?
+  status      SessionStatus @default(ACTIVE)
+  keyholder   String?
+  notes       String?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model AdultToy {
+  id           String   @id @default(uuid())
+  name         String
+  type         String
+  brand        String?
+  purchaseDate DateTime?
+  rating       Int?
+  notes        String?
+  image        String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  plugSessions AnalPlugSession[]
+}
+
+model OrgasmLog {
+  id        String   @id @default(uuid())
+  date      DateTime @default(now())
+  method    String?
+  intensity Int?     // 1-10
+  notes     String?
+  
+  createdAt DateTime @default(now())
+}
+
+model AnalPlugSession {
+  id        String   @id @default(uuid())
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  size      String?
+  duration  Int?     // in minutes
+  notes     String?
+  
+  toyId     String?
+  toy       AdultToy? @relation(fields: [toyId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model GeneratedImage {
+  id          String   @id @default(uuid())
+  prompt      String
+  imageUrl    String   // URL or base64-encoded image
+  provider    String?  // e.g., "google-imagen", "replicate", "custom"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
