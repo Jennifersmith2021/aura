@@ -112,7 +112,7 @@ export function Timeline() {
                             </div>
                             {entry.notes && (
                                 <div className="text-sm text-slate-600 dark:text-slate-300 italic p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                                    "{entry.notes}"
+                                    &quot;{entry.notes}&quot;
                                 </div>
                             )}
                         </div>

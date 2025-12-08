@@ -40,10 +40,11 @@ export function OrgasmTracker() {
     };
 
     // Calculate stats
-    const last30Days = orgasmLogs.filter(log => log.date > Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [now] = useState(() => Date.now());
+    const last30Days = orgasmLogs.filter(log => log.date > now - 30 * 24 * 60 * 60 * 1000);
     const avgPerMonth = last30Days.length;
     const lastOrgasm = orgasmLogs.length > 0 ? orgasmLogs[0] : null;
-    const daysSince = lastOrgasm ? Math.floor((Date.now() - lastOrgasm.date) / (1000 * 60 * 60 * 24)) : null;
+    const daysSince = lastOrgasm ? Math.floor((now - lastOrgasm.date) / (1000 * 60 * 60 * 24)) : null;
 
     return (
         <div className="space-y-6">
@@ -225,7 +226,7 @@ export function OrgasmTracker() {
                                                 </span>
                                             )}
                                             <span className="text-xs text-muted-foreground">
-                                                {formatDistance(log.date, Date.now(), { addSuffix: true })}
+                                                {formatDistance(log.date, now, { addSuffix: true })}
                                             </span>
                                         </div>
                                         <div className="text-xs text-muted-foreground">

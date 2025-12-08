@@ -132,8 +132,8 @@ export function Measurements() {
                                     <div>
                                         <div className="text-xs text-muted-foreground">Waist Goal</div>
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-lg font-bold">{latestValues.waist}"</span>
-                                            <span className="text-xs text-muted-foreground">→ {goalWaist}"</span>
+                                            <span className="text-lg font-bold">{latestValues.waist}&quot;</span>
+                                            <span className="text-xs text-muted-foreground">→ {goalWaist}&quot;</span>
                                         </div>
                                         <div className="w-full bg-white/50 dark:bg-slate-900/50 rounded-full h-2 mt-1">
                                             <div 

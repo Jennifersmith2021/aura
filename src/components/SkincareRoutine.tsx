@@ -5,7 +5,23 @@ import { useStore } from "@/hooks/useStore";
 import { Droplets, Plus, Trash2, Edit3, X, Sun, Moon, Calendar, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
-import { getExpirationStatus, getDaysRemaining } from "@/utils/expiration";
+import type { SkincareProduct } from "@/types";
+
+const MILLIS_IN_DAY = 1000 * 60 * 60 * 24;
+
+function computeExpiration(product: SkincareProduct): { status: "good" | "warning" | "expired" | null; daysLeft: number | null } {
+    if (!product.dateOpened || !product.expirationMonths) {
+        return { status: null, daysLeft: null };
+    }
+
+    const elapsed = Date.now() - product.dateOpened;
+    const duration = product.expirationMonths * 30 * MILLIS_IN_DAY;
+    const remaining = duration - elapsed;
+    const daysLeft = Math.ceil(remaining / MILLIS_IN_DAY);
+
+    const status = remaining < 0 ? "expired" : remaining < 30 * MILLIS_IN_DAY ? "warning" : "good";
+    return { status, daysLeft: Math.max(daysLeft, 0) };
+}
 
 export default function SkincareRoutine() {
     const { skincareProducts, addSkincareProduct, removeSkincareProduct, updateSkincareProduct } = useStore();
@@ -109,13 +125,8 @@ export default function SkincareRoutine() {
         { value: "other", label: "Other" },
     ];
 
-    const ProductCard = ({ product }: { product: any }) => {
-        const status = product.dateOpened && product.expirationMonths
-            ? getExpirationStatus(product.dateOpened, product.expirationMonths)
-            : null;
-        const daysLeft = product.dateOpened && product.expirationMonths
-            ? getDaysRemaining(product.dateOpened, product.expirationMonths)
-            : null;
+    const ProductCard = ({ product }: { product: SkincareProduct }) => {
+        const { status, daysLeft } = computeExpiration(product);
 
         return (
             <div className="bg-white/5 rounded-lg p-3 border border-white/10 hover:border-purple-500/50 transition-colors">
@@ -125,7 +136,7 @@ export default function SkincareRoutine() {
                     </div>
                     <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-white text-sm">{product.name}</h4>
-                        {product.brand && <p className="text-xs text-white/50">{product.brand}</p>}
+                        {product.brand && <p className="text-xs text-white/90 font-medium">{product.brand}</p>}
                         <div className="flex items-center gap-2 mt-1">
                             <span className="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-300 capitalize">
                                 {product.type.replace("-", " ")}
@@ -148,7 +159,7 @@ export default function SkincareRoutine() {
                                 </span>
                             )}
                         </div>
-                        {product.note && <p className="text-xs text-white/40 mt-1">{product.note}</p>}
+                        {product.note && <p className="text-xs text-white/90 font-medium mt-1">{product.note}</p>}
                     </div>
                     <div className="flex gap-1">
                         <button
@@ -232,7 +243,7 @@ export default function SkincareRoutine() {
             {skincareProducts.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Droplets className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">No skincare products added yet</p>
+                    <p className="text-white/80 font-medium text-sm">No skincare products added yet</p>
                 </div>
             ) : (
                 <div className="space-y-6">

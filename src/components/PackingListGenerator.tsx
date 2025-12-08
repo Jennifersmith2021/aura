@@ -5,7 +5,7 @@ import { useStore } from "@/hooks/useStore";
 import { Luggage, Plus, Trash2, Check, X, Calendar, MapPin, Edit3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
-import type { PackingItem } from "@/types";
+import type { PackingItem, PackingList } from "@/types";
 
 const tripTypeIcons = {
     business: "💼",
@@ -71,7 +71,7 @@ export default function PackingListGenerator() {
             tripType,
             items: generateDefaultItems(tripType),
             notes: notes.trim() || undefined,
-            created: Date.now(),
+            created: Date.now(), // eslint-disable-line react-hooks/purity
         };
         addPackingList(list);
         resetListForm();
@@ -148,7 +148,7 @@ export default function PackingListGenerator() {
         const list = packingLists.find((l) => l.id === listId);
         if (!list) return;
 
-        const updatedItems = list.items.map((item) =>
+        const updatedItems = list.items.map((item: PackingItem) =>
             item.id === itemId ? { ...item, packed: !item.packed } : item
         );
 
@@ -160,12 +160,12 @@ export default function PackingListGenerator() {
         if (!list) return;
 
         updatePackingList(listId, {
-            items: list.items.filter((item) => item.id !== itemId),
+            items: list.items.filter((item: PackingItem) => item.id !== itemId),
         });
     };
 
     const currentList = selectedList ? packingLists.find((l) => l.id === selectedList) : null;
-    const packedCount = currentList?.items.filter((i) => i.packed).length || 0;
+    const packedCount = currentList?.items.filter((i: PackingItem) => i.packed).length || 0;
     const totalCount = currentList?.items.length || 0;
     const progress = totalCount > 0 ? Math.round((packedCount / totalCount) * 100) : 0;
 
@@ -192,7 +192,7 @@ export default function PackingListGenerator() {
             {/* List Selector */}
             {packingLists.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    {packingLists.map((list) => (
+                    {packingLists.map((list: PackingList) => (
                         <button
                             key={list.id}
                             onClick={() => setSelectedList(list.id)}
@@ -263,7 +263,7 @@ export default function PackingListGenerator() {
 
                     {/* Items by Category */}
                     {Object.keys(categoryIcons).map((cat) => {
-                        const categoryItems = currentList.items.filter((item) => item.category === cat);
+                        const categoryItems = currentList.items.filter((item: PackingItem) => item.category === cat);
                         if (categoryItems.length === 0) return null;
 
                         return (
@@ -272,7 +272,7 @@ export default function PackingListGenerator() {
                                     {categoryIcons[cat as keyof typeof categoryIcons]} {cat.charAt(0).toUpperCase() + cat.slice(1)}
                                 </h5>
                                 <div className="space-y-2">
-                                    {categoryItems.map((item) => (
+                                    {categoryItems.map((item: PackingItem) => (
                                         <div
                                             key={item.id}
                                             className={clsx(
@@ -317,7 +317,7 @@ export default function PackingListGenerator() {
             ) : packingLists.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Luggage className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm mb-4">No packing lists yet</p>
+                    <p className="text-white/80 font-medium text-sm mb-4">No packing lists yet</p>
                     <button
                         onClick={() => {
                             resetListForm();
@@ -330,7 +330,7 @@ export default function PackingListGenerator() {
                 </div>
             ) : (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
-                    <p className="text-white/50 text-sm">Select a trip above</p>
+                    <p className="text-white/80 font-medium text-sm">Select a trip above</p>
                 </div>
             )}
 

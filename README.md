@@ -9,6 +9,7 @@ A mobile-first Next.js web app for closet management, makeup tracking, outfit pl
 - **Outfit Planning**: Create and save outfit looks from your items.
 - **Styling Advice**: Get AI-powered outfit and styling recommendations.
 - **Shopping Integration**: Search Amazon and other retailers with pagination/infinite scroll.
+- **Training & Wellness**: Track supplements, plan workouts, log sessions, and save affirmations with video links.
 - **Offline-Ready**: All data persists to IndexedDB; optional server sync via Prisma + PostgreSQL.
 - **Adult Content Safety**: Opt-in consent flow for adult-category products.
 

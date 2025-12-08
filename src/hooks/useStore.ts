@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { get, set, del } from "idb-keyval";
-import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle } from "@/types";
+import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle, SissyTrainingGoal, SissyTrainingLog, ComplimentEntry, PackingList, SupplementLog, WorkoutPlan, WorkoutSession, DailyAffirmation } from "@/types";
 
 
 export function useStore() {
@@ -30,13 +30,20 @@ export function useStore() {
     const [sissyLogs, setSissyLogs] = useState<SissyTrainingLog[]>([]);
     const [compliments, setCompliments] = useState<ComplimentEntry[]>([]);
     const [packingLists, setPackingLists] = useState<PackingList[]>([]);
+    
+    // New features (December 2025)
+    const [supplements, setSupplements] = useState<SupplementLog[]>([]);
+    const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
+    const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
+    const [dailyAffirmations, setDailyAffirmations] = useState<DailyAffirmation[]>([]);
+    
     const [loading, setLoading] = useState(true);
 
     // Load initial data
     useEffect(() => {
         async function loadData() {
             try {
-                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists] = await Promise.all([
+                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists, storedSupplements, storedWorkoutPlans, storedWorkoutSessions, storedDailyAffirmations] = await Promise.all([
                     get<Item[]>("items"),
                     get<Look[]>("looks"),
                     get<MeasurementLog[]>("measurements"),
@@ -60,6 +67,10 @@ export function useStore() {
                     get<SissyTrainingLog[]>("sissyLogs"),
                     get<ComplimentEntry[]>("compliments"),
                     get<PackingList[]>("packingLists"),
+                    get<SupplementLog[]>("supplements"),
+                    get<WorkoutPlan[]>("workoutPlans"),
+                    get<WorkoutSession[]>("workoutSessions"),
+                    get<DailyAffirmation[]>("dailyAffirmations"),
                 ]);
 
                 if (storedItems) setItems(storedItems);
@@ -85,6 +96,10 @@ export function useStore() {
                 if (storedSissyLogs) setSissyLogs(storedSissyLogs);
                 if (storedCompliments) setCompliments(storedCompliments);
                 if (storedPackingLists) setPackingLists(storedPackingLists);
+                if (storedSupplements) setSupplements(storedSupplements);
+                if (storedWorkoutPlans) setWorkoutPlans(storedWorkoutPlans);
+                if (storedWorkoutSessions) setWorkoutSessions(storedWorkoutSessions);
+                if (storedDailyAffirmations) setDailyAffirmations(storedDailyAffirmations);
             } catch (err) {
                 console.error("Failed to load data", err);
             } finally {
@@ -621,6 +636,135 @@ export function useStore() {
         });
     }, []);
 
+    // Supplements (NEW)
+    const addSupplement = useCallback(async (supplement: Omit<SupplementLog, 'id'>) => {
+        setSupplements((prev) => {
+            const next = [
+                ...prev,
+                { ...supplement, id: crypto.randomUUID() }
+            ].sort((a, b) => b.date - a.date);
+            set("supplements", next);
+            return next;
+        });
+    }, []);
+
+    const removeSupplement = useCallback(async (id: string) => {
+        setSupplements((prev) => {
+            const next = prev.filter((s) => s.id !== id);
+            set("supplements", next);
+            return next;
+        });
+    }, []);
+
+    const updateSupplement = useCallback(async (id: string, updates: Partial<SupplementLog>) => {
+        setSupplements((prev) => {
+            const next = prev.map((s) =>
+                s.id === id ? { ...s, ...updates } : s
+            );
+            set("supplements", next);
+            return next;
+        });
+    }, []);
+
+    // Workout Plans & Sessions (NEW)
+    const addWorkoutPlan = useCallback(async (plan: Omit<WorkoutPlan, 'id'>) => {
+        setWorkoutPlans((prev) => {
+            const next = [
+                ...prev,
+                { ...plan, id: crypto.randomUUID() }
+            ].sort((a, b) => b.date - a.date);
+            set("workoutPlans", next);
+            return next;
+        });
+    }, []);
+
+    const removeWorkoutPlan = useCallback(async (id: string) => {
+        setWorkoutPlans((prev) => {
+            const next = prev.filter((p) => p.id !== id);
+            set("workoutPlans", next);
+            return next;
+        });
+    }, []);
+
+    const updateWorkoutPlan = useCallback(async (id: string, updates: Partial<WorkoutPlan>) => {
+        setWorkoutPlans((prev) => {
+            const next = prev.map((p) =>
+                p.id === id ? { ...p, ...updates } : p
+            );
+            set("workoutPlans", next);
+            return next;
+        });
+    }, []);
+
+    const addWorkoutSession = useCallback(async (session: Omit<WorkoutSession, 'id'>) => {
+        setWorkoutSessions((prev) => {
+            const next = [
+                ...prev,
+                { ...session, id: crypto.randomUUID() }
+            ].sort((a, b) => b.date - a.date);
+            set("workoutSessions", next);
+            return next;
+        });
+    }, []);
+
+    const removeWorkoutSession = useCallback(async (id: string) => {
+        setWorkoutSessions((prev) => {
+            const next = prev.filter((s) => s.id !== id);
+            set("workoutSessions", next);
+            return next;
+        });
+    }, []);
+
+    const updateWorkoutSession = useCallback(async (id: string, updates: Partial<WorkoutSession>) => {
+        setWorkoutSessions((prev) => {
+            const next = prev.map((s) =>
+                s.id === id ? { ...s, ...updates } : s
+            );
+            set("workoutSessions", next);
+            return next;
+        });
+    }, []);
+
+    // Daily Affirmations (NEW)
+    const addDailyAffirmation = useCallback(async (affirmation: Omit<DailyAffirmation, 'id'>) => {
+        setDailyAffirmations((prev) => {
+            const next = [
+                ...prev,
+                { ...affirmation, id: crypto.randomUUID() }
+            ].sort((a, b) => b.dateAdded - a.dateAdded);
+            set("dailyAffirmations", next);
+            return next;
+        });
+    }, []);
+
+    const removeDailyAffirmation = useCallback(async (id: string) => {
+        setDailyAffirmations((prev) => {
+            const next = prev.filter((a) => a.id !== id);
+            set("dailyAffirmations", next);
+            return next;
+        });
+    }, []);
+
+    const updateDailyAffirmation = useCallback(async (id: string, updates: Partial<DailyAffirmation>) => {
+        setDailyAffirmations((prev) => {
+            const next = prev.map((a) =>
+                a.id === id ? { ...a, ...updates } : a
+            );
+            set("dailyAffirmations", next);
+            return next;
+        });
+    }, []);
+
+    const toggleAffirmationFavorite = useCallback(async (id: string) => {
+        setDailyAffirmations((prev) => {
+            const next = prev.map((a) =>
+                a.id === id ? { ...a, isFavorite: !a.isFavorite } : a
+            );
+            set("dailyAffirmations", next);
+            return next;
+        });
+    }, []);
+
     return {
         loading,
         items,
@@ -707,5 +851,22 @@ export function useStore() {
         addPackingList,
         removePackingList,
         updatePackingList,
+        supplements,
+        addSupplement,
+        removeSupplement,
+        updateSupplement,
+        workoutPlans,
+        addWorkoutPlan,
+        removeWorkoutPlan,
+        updateWorkoutPlan,
+        workoutSessions,
+        addWorkoutSession,
+        removeWorkoutSession,
+        updateWorkoutSession,
+        dailyAffirmations,
+        addDailyAffirmation,
+        removeDailyAffirmation,
+        updateDailyAffirmation,
+        toggleAffirmationFavorite,
     };
 }

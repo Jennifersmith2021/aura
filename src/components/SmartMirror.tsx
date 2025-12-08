@@ -108,7 +108,7 @@ export default function SmartMirror() {
 2. 3-4 specific feedback points about fit, colors, styling
 3. 3-4 suggestions for improvement
 4. 2-3 strengths/what's working well
-${colorSeason ? `Consider their color season: ${colorSeason.season}` : ""}
+${colorSeason ? `Consider their color season: ${colorSeason}` : ""}
 Return as JSON: {"score": number, "feedback": string[], "suggestions": string[], "strengths": string[]}`,
             
             makeup: `Analyze this makeup application for a feminine look. Provide:
@@ -116,7 +116,7 @@ Return as JSON: {"score": number, "feedback": string[], "suggestions": string[],
 2. 3-4 feedback points about application, color choices, techniques
 3. 3-4 suggestions for improvement
 4. 2-3 strengths
-${colorSeason ? `Their color season is ${colorSeason.season}` : ""}
+${colorSeason ? `Their color season is ${colorSeason}` : ""}
 Return as JSON: {"score": number, "feedback": string[], "suggestions": string[], "strengths": string[]}`,
             
             pose: `Analyze this photo for posture, pose, and body language. Provide:
@@ -283,9 +283,9 @@ Return as JSON: {"score": number, "feedback": string[], "suggestions": string[],
                         className="hidden"
                     />
                     <div className="bg-white/5 border-2 border-dashed border-white/20 rounded-xl p-12 text-center cursor-pointer hover:bg-white/10 hover:border-purple-500/50 transition-all">
-                        <Camera className="w-12 h-12 text-white/40 mx-auto mb-3" />
+                        <Camera className="w-12 h-12 text-white/80 mx-auto mb-3" />
                         <p className="text-white/60 text-sm mb-1">Click to upload a photo</p>
-                        <p className="text-white/40 text-xs">Take a full-body shot in good lighting</p>
+                        <p className="text-white/80 font-medium text-xs">Take a full-body shot in good lighting</p>
                     </div>
                 </label>
             ) : (
@@ -349,7 +349,7 @@ Return as JSON: {"score": number, "feedback": string[], "suggestions": string[],
                                     <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-500/20">
                                         <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-green-400">
                                             <Sparkles className="w-4 h-4" />
-                                            What's Working Well
+                                            What&apos;s Working Well
                                         </h4>
                                         <ul className="space-y-1">
                                             {analysis.strengths.map((strength, idx) => (

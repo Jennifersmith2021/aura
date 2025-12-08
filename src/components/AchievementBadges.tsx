@@ -118,14 +118,14 @@ export default function AchievementBadges() {
                 break;
             case "waist-goal":
                 const latestMeasurement = measurements[0];
-                if (latestMeasurement?.waist && latestMeasurement.goalWaist) {
-                    current = latestMeasurement.waist <= latestMeasurement.goalWaist ? 1 : 0;
+                if (latestMeasurement?.values?.waist && latestMeasurement.goalWaist) {
+                    current = latestMeasurement.values.waist <= latestMeasurement.goalWaist ? 1 : 0;
                 }
                 break;
             case "whr-goal":
                 const latest = measurements[0];
-                if (latest?.waist && latest.hips) {
-                    const whr = latest.waist / latest.hips;
+                if (latest?.values?.waist && latest.values?.hips) {
+                    const whr = latest.values.waist / latest.values.hips;
                     current = whr <= 0.7 ? 1 : 0;
                 }
                 break;
@@ -148,9 +148,9 @@ export default function AchievementBadges() {
             case "month-locked":
             case "100-days":
                 const longestSession = chastitySessions.reduce((max, session) => {
-                    const duration = session.unlocked
-                        ? session.unlocked - session.locked
-                        : Date.now() - session.locked;
+                    const duration = session.endDate
+                        ? session.endDate - session.startDate
+                        : Date.now() - session.startDate;
                     const days = Math.floor(duration / (24 * 60 * 60 * 1000));
                     return Math.max(max, days);
                 }, 0);
@@ -243,19 +243,19 @@ export default function AchievementBadges() {
                 <div className="grid grid-cols-4 gap-2 text-xs">
                     <div className="text-center">
                         <div className="font-bold text-gray-400">{stats.byRarity.common}</div>
-                        <div className="text-white/50">Common</div>
+                        <div className="text-white/90 font-medium">Common</div>
                     </div>
                     <div className="text-center">
                         <div className="font-bold text-blue-400">{stats.byRarity.rare}</div>
-                        <div className="text-white/50">Rare</div>
+                        <div className="text-white/90 font-medium">Rare</div>
                     </div>
                     <div className="text-center">
                         <div className="font-bold text-purple-400">{stats.byRarity.epic}</div>
-                        <div className="text-white/50">Epic</div>
+                        <div className="text-white/90 font-medium">Epic</div>
                     </div>
                     <div className="text-center">
                         <div className="font-bold text-yellow-400">{stats.byRarity.legendary}</div>
-                        <div className="text-white/50">Legendary</div>
+                        <div className="text-white/90 font-medium">Legendary</div>
                     </div>
                 </div>
             </div>
@@ -296,7 +296,7 @@ export default function AchievementBadges() {
                             {achievement.unlocked ? (
                                 <Unlock className="w-4 h-4 text-white/80" />
                             ) : (
-                                <Lock className="w-4 h-4 text-white/30" />
+                                <Lock className="w-4 h-4 text-white/80" />
                             )}
                         </div>
 

@@ -108,9 +108,10 @@ export default function ComplimentJournal() {
         : compliments;
 
     // Stats
+    const [now] = useState(() => Date.now());
     const totalCompliments = compliments.length;
     const favoriteCount = compliments.filter((c) => c.favorite).length;
-    const thisWeek = compliments.filter((c) => c.date > Date.now() - 7 * 24 * 60 * 60 * 1000).length;
+    const thisWeek = compliments.filter((c) => c.date > now - 7 * 24 * 60 * 60 * 1000).length;
     const mostCommonMood = compliments.length > 0
         ? Object.entries(
               compliments.reduce((acc, c) => {
@@ -178,7 +179,7 @@ export default function ComplimentJournal() {
             {filteredCompliments.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Sparkles className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">
+                    <p className="text-white/80 font-medium text-sm">
                         {filterFavorites ? "No favorite compliments yet" : "No compliments recorded yet"}
                     </p>
                 </div>
@@ -202,13 +203,13 @@ export default function ComplimentJournal() {
                                                     "w-4 h-4",
                                                     entry.favorite
                                                         ? "fill-yellow-400 text-yellow-400"
-                                                        : "text-white/30 hover:text-yellow-400"
+                                                        : "text-white/80 hover:text-yellow-400 font-medium"
                                                 )}
                                             />
                                         </button>
                                     </div>
                                     <blockquote className="text-white italic border-l-4 border-yellow-500/50 pl-3 mb-2">
-                                        "{entry.compliment}"
+                                        &quot;{entry.compliment}&quot;
                                     </blockquote>
                                 </div>
                             </div>
@@ -217,20 +218,20 @@ export default function ComplimentJournal() {
                             <div className="space-y-1 text-sm text-white/60 mb-2">
                                 {entry.source && (
                                     <div>
-                                        <span className="text-white/40">From:</span> {entry.source}
+                                        <span className="text-white/90 font-medium">From:</span> {entry.source}
                                     </div>
                                 )}
                                 {entry.context && (
                                     <div>
-                                        <span className="text-white/40">Context:</span> {entry.context}
+                                        <span className="text-white/90 font-medium">Context:</span> {entry.context}
                                     </div>
                                 )}
                                 {entry.outfit && (
                                     <div>
-                                        <span className="text-white/40">Wearing:</span> {entry.outfit}
+                                        <span className="text-white/90 font-medium">Wearing:</span> {entry.outfit}
                                     </div>
                                 )}
-                                <div className="flex items-center gap-1 text-xs text-white/40">
+                                <div className="flex items-center gap-1 text-xs text-white/90 font-medium">
                                     <Calendar className="w-3 h-3" />
                                     {new Date(entry.date).toLocaleDateString()}
                                 </div>

@@ -10,6 +10,12 @@ export default defineConfig({
   reporter: process.env.CI
     ? [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]]
     : [['list'], ['html']],
+  webServer: {
+    command: 'npm run dev',
+    port: 3000,
+    timeout: 120 * 1000,
+    reuseExistingServer: !process.env.CI,
+  },
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     headless: true,

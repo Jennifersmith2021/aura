@@ -110,7 +110,7 @@ export default function OutfitRatingSystem() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium truncate">{item.look.name}</div>
-                                    <div className="flex items-center gap-2 text-xs text-white/50">
+                                    <div className="flex items-center gap-2 text-xs text-white/90 font-medium">
                                         <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                         {item.avgRating.toFixed(1)} ({item.ratingCount} rating{item.ratingCount > 1 ? "s" : ""})
                                     </div>
@@ -145,7 +145,7 @@ export default function OutfitRatingSystem() {
             ) : (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Eye className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">Create some looks in the Looks tab first!</p>
+                    <p className="text-white/80 font-medium text-sm">Create some looks in the Looks tab first!</p>
                 </div>
             )}
 
@@ -165,7 +165,7 @@ export default function OutfitRatingSystem() {
                                                 "w-5 h-5",
                                                 star <= currentAvg
                                                     ? "fill-yellow-400 text-yellow-400"
-                                                    : "text-white/20"
+                                                    : "text-white/90 font-medium"
                                             )}
                                         />
                                     ))}
@@ -203,7 +203,7 @@ export default function OutfitRatingSystem() {
                                                             "w-4 h-4",
                                                             star <= r.rating
                                                                 ? "fill-yellow-400 text-yellow-400"
-                                                                : "text-white/20"
+                                                                : "text-white/90 hover:text-white/70 font-medium"
                                                         )}
                                                     />
                                                 ))}
@@ -218,11 +218,11 @@ export default function OutfitRatingSystem() {
                                     </div>
                                     {r.comment && (
                                         <div className="flex items-start gap-2 mt-2">
-                                            <MessageSquare className="w-4 h-4 text-white/50 flex-shrink-0 mt-0.5" />
-                                            <p className="text-sm text-white/90 italic">"{r.comment}"</p>
+                                            <MessageSquare className="w-4 h-4 text-white/90 font-medium flex-shrink-0 mt-0.5" />
+                                            <p className="text-sm text-white/90 italic">&quot;{r.comment}&quot;</p>
                                         </div>
                                     )}
-                                    <div className="flex items-center gap-1 text-xs text-white/40 mt-2">
+                                    <div className="flex items-center gap-1 text-xs text-white/90 font-medium mt-2">
                                         <Calendar className="w-3 h-3" />
                                         {new Date(r.date).toLocaleDateString()}
                                     </div>
@@ -232,7 +232,7 @@ export default function OutfitRatingSystem() {
                     ) : (
                         <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                             <Star className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                            <p className="text-white/50 text-sm">No ratings yet for this look</p>
+                            <p className="text-white/80 font-medium text-sm">No ratings yet for this look</p>
                         </div>
                     )}
                 </div>
@@ -262,13 +262,13 @@ export default function OutfitRatingSystem() {
                         >
                             <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                                 <Star className="w-5 h-5 text-pink-400" />
-                                Rate "{currentLook.name}"
+                                Rate &quot;{currentLook.name}&quot;
                             </h3>
 
                             <div className="space-y-4">
                                 {/* Rater Name */}
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Who's rating? *</label>
+                                    <label className="block text-sm font-medium mb-2">Who&apos;s rating? *</label>
                                     <input
                                         type="text"
                                         value={raterName}
@@ -293,13 +293,13 @@ export default function OutfitRatingSystem() {
                                                         "w-10 h-10",
                                                         star <= rating
                                                             ? "fill-yellow-400 text-yellow-400"
-                                                            : "text-white/20 hover:text-white/40"
+                                                            : "text-white/90 hover:text-white/70 font-medium"
                                                     )}
                                                 />
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-center text-sm text-white/50 mt-1">
+                                    <p className="text-center text-sm text-white/80 font-medium mt-1">
                                         {rating === 1 && "Not great"}
                                         {rating === 2 && "Could be better"}
                                         {rating === 3 && "Good"}

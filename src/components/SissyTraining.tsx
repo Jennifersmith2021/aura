@@ -193,7 +193,8 @@ export default function SissyTraining() {
     const avgProgress = sissyGoals.length > 0
         ? Math.round(sissyGoals.reduce((sum, g) => sum + g.progress, 0) / sissyGoals.length)
         : 0;
-    const thisWeekLogs = sissyLogs.filter((l) => l.date > Date.now() - 7 * 24 * 60 * 60 * 1000).length;
+    const [now] = useState(() => Date.now());
+    const thisWeekLogs = sissyLogs.filter((l) => l.date > now - 7 * 24 * 60 * 60 * 1000).length;
 
     return (
         <div className="space-y-4">

@@ -77,7 +77,7 @@ export default function ProgressPhotoGallery() {
         const newPhoto: ProgressPhoto = {
             id: crypto.randomUUID(),
             photo,
-            date: Date.now(),
+            date: Date.now(), // eslint-disable-line react-hooks/purity
             title: title.trim() || undefined,
             notes: notes.trim() || undefined,
             category,
@@ -122,8 +122,9 @@ export default function ProgressPhotoGallery() {
     }).length;
 
     const oldestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
+    const [now] = useState(() => Date.now());
     const daysSinceStart = oldestPhoto
-        ? Math.floor((Date.now() - oldestPhoto.date) / (24 * 60 * 60 * 1000))
+        ? Math.floor((now - oldestPhoto.date) / (24 * 60 * 60 * 1000))
         : 0;
 
     return (
@@ -168,7 +169,7 @@ export default function ProgressPhotoGallery() {
                         <span className="text-xs font-medium">Journey</span>
                     </div>
                     <div className="text-2xl font-bold">{daysSinceStart}</div>
-                    <div className="text-xs text-white/50">days</div>
+                    <div className="text-xs text-white/90 font-medium">days</div>
                 </div>
             </div>
 
@@ -224,7 +225,7 @@ export default function ProgressPhotoGallery() {
             ) : (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Camera className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm mb-4">No progress photos yet</p>
+                    <p className="text-white/80 font-medium text-sm mb-4">No progress photos yet</p>
                     <button
                         onClick={() => {
                             resetForm();
@@ -273,7 +274,7 @@ export default function ProgressPhotoGallery() {
                                             className="hidden"
                                         />
                                         <div className="bg-white/5 border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:bg-white/10 hover:border-blue-500/50 transition-all">
-                                            <Camera className="w-8 h-8 text-white/40 mx-auto mb-2" />
+                                            <Camera className="w-8 h-8 text-white/80 mx-auto mb-2" />
                                             <p className="text-white/60 text-sm">Click to upload photo</p>
                                         </div>
                                     </label>

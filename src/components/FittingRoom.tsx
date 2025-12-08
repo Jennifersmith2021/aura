@@ -351,7 +351,7 @@ export function FittingRoom() {
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-xl border">
           <div className="flex items-center gap-2 text-sm">
             <Sparkles className="w-4 h-4 text-blue-500" />
-            <span className="font-medium">Today's Weather:</span>
+            <span className="font-medium">Today&apos;s Weather:</span>
             <span>{Math.round(weather.temperature)}°F</span>
             <span className="text-muted-foreground">•</span>
             <span>{weather.weatherCode}</span>

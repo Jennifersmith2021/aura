@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Trophy, Target, Calendar, Zap, Award, Check, X, Plus, Trash2, Play, Pause } from "lucide-react";
+import { Trophy, Target, Calendar, Zap, Check, X, Plus, Trash2, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { get, set } from "idb-keyval";
@@ -94,6 +94,7 @@ const presetChallenges: Omit<Challenge, "id" | "startDate" | "completed" | "prog
 ];
 
 export default function ChallengeSystem() {
+    const [now] = useState(() => Date.now());
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showPresetsModal, setShowPresetsModal] = useState(false);
@@ -142,8 +143,7 @@ export default function ChallengeSystem() {
         if (!challenge || !challenge.startDate) return;
 
         const dayTimestamp = challenge.startDate + dayIndex * 24 * 60 * 60 * 1000;
-        const today = Date.now();
-        if (dayTimestamp > today) return; // Can't complete future days
+        if (dayTimestamp > now) return; // Can't complete future days
 
         const completedDays = challenge.completedDays.includes(dayIndex)
             ? challenge.completedDays.filter((d) => d !== dayIndex)
@@ -245,7 +245,7 @@ export default function ChallengeSystem() {
                 <div className="space-y-3">
                     {challenges.map((challenge) => {
                         const daysElapsed = challenge.startDate
-                            ? Math.floor((Date.now() - challenge.startDate) / (24 * 60 * 60 * 1000))
+                            ? Math.floor((now - challenge.startDate) / (24 * 60 * 60 * 1000))
                             : 0;
                         const isActive = challenge.startDate && !challenge.completed;
 
@@ -301,7 +301,7 @@ export default function ChallengeSystem() {
                                             {challenge.duration} days • {challenge.difficulty}
                                         </span>
                                         {isActive && (
-                                            <span className="text-white/50">
+                                            <span className="text-white/90 font-medium">
                                                 Day {Math.min(daysElapsed + 1, challenge.duration)}/{challenge.duration}
                                             </span>
                                         )}
@@ -329,7 +329,7 @@ export default function ChallengeSystem() {
             ) : (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Target className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm mb-4">No challenges yet</p>
+                    <p className="text-white/80 font-medium text-sm mb-4">No challenges yet</p>
                     <button
                         onClick={() => setShowPresetsModal(true)}
                         className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors"
@@ -349,8 +349,8 @@ export default function ChallengeSystem() {
                     <div className="grid grid-cols-7 gap-2">
                         {Array.from({ length: currentChallenge.duration }).map((_, idx) => {
                             const dayTimestamp = currentChallenge.startDate! + idx * 24 * 60 * 60 * 1000;
-                            const isToday = Math.floor((Date.now() - currentChallenge.startDate!) / (24 * 60 * 60 * 1000)) === idx;
-                            const isPast = dayTimestamp <= Date.now();
+                            const isToday = Math.floor((now - currentChallenge.startDate!) / (24 * 60 * 60 * 1000)) === idx;
+                            const isPast = dayTimestamp <= now;
                             const isCompleted = currentChallenge.completedDays.includes(idx);
 
                             return (
@@ -364,7 +364,7 @@ export default function ChallengeSystem() {
                                             ? "bg-green-500 text-white"
                                             : isPast
                                             ? "bg-white/10 hover:bg-white/20"
-                                            : "bg-white/5 text-white/30 cursor-not-allowed",
+                                            : "bg-white/5 text-white/80 font-medium cursor-not-allowed",
                                         isToday && "ring-2 ring-purple-500"
                                     )}
                                 >
@@ -432,7 +432,7 @@ export default function ChallengeSystem() {
                                                     <h4 className="font-semibold">{preset.title}</h4>
                                                 </div>
                                                 <p className="text-xs text-white/60 mb-2">{preset.description}</p>
-                                                <div className="flex items-center gap-2 text-xs text-white/50">
+                                                <div className="flex items-center gap-2 text-xs text-white/90 font-medium">
                                                     <span>{preset.duration} days</span>
                                                     <span>•</span>
                                                     <span className={difficultyColors[preset.difficulty]}>

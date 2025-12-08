@@ -39,18 +39,19 @@ export default function ArousalTracker() {
     };
 
     // Calculate stats
+    const [now] = useState(() => Date.now());
     const avgLevel = arousalLogs.length > 0
         ? (arousalLogs.reduce((sum, log) => sum + log.level, 0) / arousalLogs.length).toFixed(1)
         : "0";
     
-    const last7Days = arousalLogs.filter(log => log.date > Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const last7Days = arousalLogs.filter(log => log.date > now - 7 * 24 * 60 * 60 * 1000);
     const avgLast7 = last7Days.length > 0
         ? (last7Days.reduce((sum, log) => sum + log.level, 0) / last7Days.length).toFixed(1)
         : "0";
 
     // Chart data (last 30 days)
     const chartData = arousalLogs
-        .filter(log => log.date > Date.now() - 30 * 24 * 60 * 60 * 1000)
+        .filter(log => log.date > now - 30 * 24 * 60 * 60 * 1000)
         .sort((a, b) => a.date - b.date)
         .map(log => ({
             date: new Date(log.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -233,7 +234,7 @@ export default function ArousalTracker() {
                                         onChange={(e) => setLevel(parseInt(e.target.value))}
                                         className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider-thumb"
                                     />
-                                    <div className="flex justify-between text-xs text-white/50 mt-1">
+                                    <div className="flex justify-between text-xs text-white/90 font-medium mt-1">
                                         <span>Low</span>
                                         <span>Medium</span>
                                         <span>High</span>

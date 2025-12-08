@@ -137,7 +137,7 @@ export default function HairStyleGallery() {
             {sortedStyles.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Scissors className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">No hair styles recorded yet</p>
+                    <p className="text-white/80 font-medium text-sm">No hair styles recorded yet</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -165,7 +165,7 @@ export default function HairStyleGallery() {
                                     <div className="flex items-start justify-between mb-2">
                                         <div>
                                             <h4 className="font-medium text-white mb-1">{style.name}</h4>
-                                            <div className="flex items-center gap-2 text-xs text-white/50">
+                                            <div className="flex items-center gap-2 text-xs text-white/90 font-medium">
                                                 <Calendar className="w-3 h-3" />
                                                 {new Date(style.date).toLocaleDateString()}
                                             </div>
@@ -180,7 +180,7 @@ export default function HairStyleGallery() {
                                                         "w-4 h-4",
                                                         star <= (style.rating ?? 0)
                                                             ? "fill-yellow-400 text-yellow-400"
-                                                            : "text-white/20"
+                                                            : "text-white/90 font-medium"
                                                     )}
                                                 />
                                             ))}
@@ -211,7 +211,7 @@ export default function HairStyleGallery() {
                                     )}
 
                                     {/* Duration & Cost */}
-                                    <div className="flex gap-4 mb-2 text-xs text-white/40">
+                                    <div className="flex gap-4 mb-2 text-xs text-white/90 font-medium">
                                         {style.duration && <span>Lasted {style.duration} days</span>}
                                         {style.cost && <span>${style.cost.toFixed(2)}</span>}
                                     </div>
@@ -402,7 +402,7 @@ export default function HairStyleGallery() {
                                                         "w-8 h-8 transition-colors",
                                                         star <= (rating ?? 0)
                                                             ? "fill-yellow-400 text-yellow-400"
-                                                            : "text-white/20 hover:text-white/40"
+                                                            : "text-white/90 hover:text-white/70 font-medium"
                                                     )}
                                                 />
                                             </button>

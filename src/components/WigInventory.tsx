@@ -110,7 +110,7 @@ export default function WigInventory() {
     };
 
     const handleWear = (wigId: string) => {
-        updateWig(wigId, { lastWorn: Date.now() });
+        updateWig(wigId, { lastWorn: Date.now() }); // eslint-disable-line react-hooks/purity
     };
 
     return (
@@ -137,7 +137,7 @@ export default function WigInventory() {
             {wigCollection.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <User className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">No wigs in collection yet</p>
+                    <p className="text-white/80 font-medium text-sm">No wigs in collection yet</p>
                 </div>
             ) : (
                 <div className="grid gap-4">
@@ -177,9 +177,9 @@ export default function WigInventory() {
                                             {wig.material}
                                         </span>
                                     </div>
-                                    {wig.brand && <p className="text-xs text-white/50 mb-1">{wig.brand}</p>}
+                                    {wig.brand && <p className="text-xs text-white/90 font-medium mb-1">{wig.brand}</p>}
                                     {wig.lastWorn && (
-                                        <p className="text-xs text-white/40 flex items-center gap-1">
+                                        <p className="text-xs text-white/90 font-medium flex items-center gap-1">
                                             <Calendar className="w-3 h-3" />
                                             Last worn: {new Date(wig.lastWorn).toLocaleDateString()}
                                         </p>

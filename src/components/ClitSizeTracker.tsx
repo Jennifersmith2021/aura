@@ -87,15 +87,15 @@ export default function ClitSizeTracker() {
             <div className="grid grid-cols-3 gap-3">
                 <div className="bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-xl p-3 border border-pink-500/20">
                     <div className="text-pink-400 text-xs mb-1">Latest</div>
-                    <div className="text-xl font-bold text-white">{latestMeasurement?.lengthMm || "—"}<span className="text-sm text-white/50">mm</span></div>
+                    <div className="text-xl font-bold text-white">{latestMeasurement?.lengthMm || "—"}<span className="text-sm text-white/90 font-medium">mm</span></div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-xl p-3 border border-purple-500/20">
                     <div className="text-purple-400 text-xs mb-1">Average</div>
-                    <div className="text-xl font-bold text-white">{avgLength}<span className="text-sm text-white/50">mm</span></div>
+                    <div className="text-xl font-bold text-white">{avgLength}<span className="text-sm text-white/90 font-medium">mm</span></div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-3 border border-blue-500/20">
                     <div className="text-blue-400 text-xs mb-1">Growth</div>
-                    <div className="text-xl font-bold text-white">+{growth}<span className="text-sm text-white/50">mm</span></div>
+                    <div className="text-xl font-bold text-white">+{growth}<span className="text-sm text-white/90 font-medium">mm</span></div>
                 </div>
             </div>
 
@@ -153,7 +153,7 @@ export default function ClitSizeTracker() {
                                                 {measurement.arousalState?.replace("-", " ")}
                                             </span>
                                         </div>
-                                        <div className="text-xs text-white/50 mb-1">
+                                        <div className="text-xs text-white/90 font-medium mb-1">
                                             {new Date(measurement.date).toLocaleDateString()}
                                             {measurement.method && ` · ${measurement.method}`}
                                         </div>

@@ -150,7 +150,7 @@ export default function IntimacyJournal() {
             {filteredEntries.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <BookHeart className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">
+                    <p className="text-white/80 font-medium text-sm">
                         {filterTag ? `No entries with tag "${filterTag}"` : "No journal entries yet"}
                     </p>
                 </div>
@@ -170,7 +170,7 @@ export default function IntimacyJournal() {
                                         {entry.isPrivate && (
                                             <Lock className="w-3.5 h-3.5 text-purple-400" />
                                         )}
-                                        <span className="text-xs text-white/50 ml-auto">
+                                        <span className="text-xs text-white/90 font-medium ml-auto">
                                             {new Date(entry.date).toLocaleDateString()}
                                         </span>
                                     </div>
@@ -229,7 +229,7 @@ export default function IntimacyJournal() {
                                                             <Lock className="w-4 h-4 text-purple-400" />
                                                         )}
                                                     </h3>
-                                                    <p className="text-sm text-white/50">
+                                                    <p className="text-sm text-white/90 font-medium">
                                                         {new Date(entry.date).toLocaleDateString("en-US", {
                                                             weekday: "long",
                                                             year: "numeric",
@@ -385,7 +385,7 @@ export default function IntimacyJournal() {
                                     <Lock className="w-5 h-5 text-purple-400" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium">Extra Private</p>
-                                        <p className="text-xs text-white/50">Mark as especially sensitive</p>
+                                        <p className="text-xs text-white/90 font-medium">Mark as especially sensitive</p>
                                     </div>
                                     <input
                                         type="checkbox"

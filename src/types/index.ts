@@ -12,6 +12,7 @@ export interface Item {
     image?: string; // Base64 or URL
     purchaseUrl?: string;
     price?: number;
+    wishlist?: boolean;
     brand?: string;
     dateAdded: number;
     dateOpened?: number; // For makeup expiration
@@ -310,4 +311,57 @@ export interface Achievement {
     progress: number; // 0-100
     requirement: number;
     rarity: "common" | "rare" | "epic" | "legendary";
+}
+
+// ===== NEW FEATURES (December 2025) =====
+
+export interface SupplementLog {
+    id: string;
+    date: number;
+    name: string;
+    type: "vitamin" | "mineral" | "herb" | "protein" | "other";
+    dosage: number;
+    unit: "mg" | "mcg" | "ml" | "tablet" | "capsule" | "g";
+    notes?: string;
+    lastTaken?: number;
+}
+
+export interface WorkoutPlan {
+    id: string;
+    date: number;
+    dayOfWeek: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+    exercises: {
+        name: string;
+        sets?: number;
+        reps?: number;
+        weight?: number;
+        notes?: string;
+        youtubeUrl?: string;
+    }[];
+    notes?: string;
+}
+
+export interface WorkoutSession {
+    id: string;
+    date: number;
+    planId?: string; // Reference to WorkoutPlan if planned
+    exercises: {
+        name: string;
+        sets?: number;
+        reps?: number;
+        weight?: number;
+        youtubeUrl?: string;
+        notes?: string;
+    }[];
+    duration?: number; // minutes
+    notes?: string;
+}
+
+export interface DailyAffirmation {
+    id: string;
+    text: string;
+    category: "sissy" | "general" | "confidence" | "body-positive";
+    videoUrl?: string; // YouTube link for reinforcement videos
+    isFavorite?: boolean;
+    dateAdded: number;
 }

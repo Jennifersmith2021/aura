@@ -21,11 +21,6 @@ export function OutfitGenerator({ baseItem, onClose }: OutfitGeneratorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
-    // Initial generation
-    useEffect(() => {
-        generateOutfit();
-    }, []);
-
     function generateOutfit() {
         // Simple logic: Base Item + 1 compatible item from each other major category
         const look: Item[] = [baseItem];

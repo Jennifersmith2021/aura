@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStore } from "@/hooks/useStore";
+import { ToyItem } from "@/types";
 import { Package, Plus, Trash2, Edit3, Sparkles, Calendar, AlertCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
@@ -90,15 +91,16 @@ export default function ToyCollectionManager() {
     };
 
     // Check if cleaning is due
-    const isCleaningDue = (toy: any) => {
+    const [now] = useState(() => Date.now());
+    const isCleaningDue = (toy: Partial<ToyItem>) => {
         if (!toy.lastCleaning || !toy.cleaningFrequencyDays) return false;
-        const daysSince = (Date.now() - toy.lastCleaning) / (1000 * 60 * 60 * 24);
+        const daysSince = (now - toy.lastCleaning) / (1000 * 60 * 60 * 24);
         return daysSince >= toy.cleaningFrequencyDays;
     };
 
-    const daysUntilCleaning = (toy: any) => {
+    const daysUntilCleaning = (toy: Partial<ToyItem>) => {
         if (!toy.lastCleaning || !toy.cleaningFrequencyDays) return null;
-        const daysSince = (Date.now() - toy.lastCleaning) / (1000 * 60 * 60 * 24);
+        const daysSince = (now - toy.lastCleaning) / (1000 * 60 * 60 * 24);
         return Math.max(0, Math.ceil(toy.cleaningFrequencyDays - daysSince));
     };
 
@@ -126,7 +128,7 @@ export default function ToyCollectionManager() {
             {toyCollection.length === 0 ? (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                     <Package className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/50 text-sm">No items in collection yet</p>
+                    <p className="text-white/80 font-medium text-sm">No items in collection yet</p>
                 </div>
             ) : (
                 <div className="grid gap-4">
@@ -183,14 +185,14 @@ export default function ToyCollectionManager() {
                                                     Clean · Next in {daysUntilCleaning(toy)} days
                                                 </div>
                                             ) : (
-                                                <div className="text-xs text-white/50">
+                                                <div className="text-xs text-white/90 font-medium">
                                                     Clean every {toy.cleaningFrequencyDays} days
                                                 </div>
                                             )}
                                         </div>
                                     )}
 
-                                    {toy.note && <p className="text-xs text-white/50 mb-2">{toy.note}</p>}
+                                    {toy.note && <p className="text-xs text-white/90 font-medium mb-2">{toy.note}</p>}
 
                                     {/* Actions */}
                                     <div className="flex gap-2">

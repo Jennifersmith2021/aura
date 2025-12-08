@@ -62,23 +62,6 @@ export default function DailyAffirmations() {
     const [savedAffirmations, setSavedAffirmations] = useState<SavedAffirmation[]>([]);
     const [showSaved, setShowSaved] = useState(false);
 
-    useEffect(() => {
-        // Load saved affirmations
-        get<SavedAffirmation[]>("affirmations").then((stored) => {
-            if (stored) setSavedAffirmations(stored);
-        });
-
-        // Load daily affirmation (or generate new one)
-        const today = new Date().toDateString();
-        get<{ text: string; category: string; date: string }>("dailyAffirmation").then((stored) => {
-            if (stored && stored.date === today) {
-                setCurrentAffirmation({ text: stored.text, category: stored.category });
-            } else {
-                generateNewAffirmation();
-            }
-        });
-    }, []);
-
     const generateNewAffirmation = useCallback(() => {
         const categories = Object.keys(affirmationCategories) as Array<keyof typeof affirmationCategories>;
         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
@@ -94,6 +77,23 @@ export default function DailyAffirmations() {
             date: new Date().toDateString(),
         });
     }, []);
+
+    useEffect(() => {
+        // Load saved affirmations
+        get<SavedAffirmation[]>("affirmations").then((stored) => {
+            if (stored) setSavedAffirmations(stored);
+        });
+
+        // Load daily affirmation (or generate new one)
+        const today = new Date().toDateString();
+        get<{ text: string; category: string; date: string }>("dailyAffirmation").then((stored) => {
+            if (stored && stored.date === today) {
+                setCurrentAffirmation({ text: stored.text, category: stored.category });
+            } else {
+                generateNewAffirmation();
+            }
+        });
+    }, [generateNewAffirmation]);
 
     const saveAffirmation = useCallback(() => {
         if (!currentAffirmation) return;
@@ -182,7 +182,7 @@ export default function DailyAffirmations() {
 
                                 {/* Affirmation text */}
                                 <p className="text-xl font-medium text-white leading-relaxed mb-6">
-                                    "{currentAffirmation.text}"
+                                    &quot;{currentAffirmation.text}&quot;
                                 </p>
 
                                 {/* Action buttons */}
@@ -236,7 +236,7 @@ export default function DailyAffirmations() {
                                         >
                                             <Star
                                                 className={`w-5 h-5 ${
-                                                    affirmation.favorite ? "fill-yellow-400 text-yellow-400" : "text-white/40"
+                                                    affirmation.favorite ? "fill-yellow-400 text-yellow-400" : "text-white/80 font-medium"
                                                 }`}
                                             />
                                         </button>
@@ -247,7 +247,7 @@ export default function DailyAffirmations() {
                                         </div>
 
                                         {/* Text */}
-                                        <p className="text-sm text-white font-medium mb-3 pr-8 leading-relaxed">"{affirmation.text}"</p>
+                                        <p className="text-sm text-white font-medium mb-3 pr-8 leading-relaxed">&quot;{affirmation.text}&quot;</p>
 
                                         {/* Footer */}
                                         <div className="flex items-center justify-between text-xs text-white/70">
@@ -257,7 +257,7 @@ export default function DailyAffirmations() {
                                             </div>
                                             <button
                                                 onClick={() => removeAffirmation(affirmation.text)}
-                                                className="text-white/40 hover:text-red-400 transition-colors"
+                                                className="text-white/80 font-medium hover:text-red-400 transition-colors"
                                             >
                                                 Remove
                                             </button>
@@ -268,7 +268,7 @@ export default function DailyAffirmations() {
                     ) : (
                         <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
                             <Heart className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                            <p className="text-white/50 text-sm">No saved affirmations yet</p>
+                            <p className="text-white/80 font-medium text-sm">No saved affirmations yet</p>
                         </div>
                     )}
                 </>

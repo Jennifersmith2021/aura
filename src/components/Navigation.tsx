@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Shirt, Sparkles, Scissors, Menu, Brush, ShoppingBag } from "lucide-react";
+import { Home, Shirt, Sparkles, Scissors, Menu, Brush, ShoppingBag, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Navigation() {
@@ -16,6 +16,7 @@ export function Navigation() {
         { href: "/fitting-room", label: "Try On", icon: Scissors },
         { href: "/studio", label: "Studio", icon: Menu },
         { href: "/stylist", label: "Ask Aura", icon: Sparkles },
+        { href: "/training", label: "Training", icon: Dumbbell },
     ];
 
     return (

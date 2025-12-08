@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "@/hooks/useStore";
 import { BarChart3, TrendingUp, DollarSign, Palette, Calendar, Star } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
-import clsx from "clsx";
 
 const COLORS = ["#ec4899", "#a855f7", "#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 export default function ClosetAnalytics() {
     const { items, looks } = useStore();
+    const [computedNow] = useState(() => Date.now());
 
     // Calculate analytics
     const analytics = useMemo(() => {
@@ -17,7 +17,7 @@ export default function ClosetAnalytics() {
         const makeupItems = items.filter((item) => item.type === "makeup");
 
         // Total value
-        const totalValue = items.reduce((sum, item) => sum + (item.cost || 0), 0);
+        const totalValue = items.reduce((sum, item) => sum + (item.price || 0), 0);
 
         // Most worn items (placeholder - would need wear tracking)
         const itemsWithWears = items
@@ -30,10 +30,10 @@ export default function ClosetAnalytics() {
 
         // Cost per wear
         const itemsWithCPW = itemsWithWears
-            .filter((item) => (item as any).cost && item.wears > 0)
+            .filter((item) => item.price && item.wears > 0)
             .map((item) => ({
                 ...item,
-                cpw: ((item as any).cost || 0) / item.wears,
+                cpw: (item.price || 0) / item.wears,
             }))
             .sort((a, b) => a.cpw - b.cpw)
             .slice(0, 5);
@@ -65,12 +65,12 @@ export default function ClosetAnalytics() {
             .slice(0, 6);
 
         // Monthly additions (last 6 months)
-        const sixMonthsAgo = Date.now() - 6 * 30 * 24 * 60 * 60 * 1000;
-        const recentItems = items.filter((item) => item.addedDate && item.addedDate >= sixMonthsAgo);
+        const sixMonthsAgo = computedNow - 6 * 30 * 24 * 60 * 60 * 1000;
+        const recentItems = items.filter((item) => item.dateAdded && item.dateAdded >= sixMonthsAgo);
         const monthlyData: Record<string, number> = {};
         recentItems.forEach((item) => {
-            if (item.addedDate) {
-                const month = new Date(item.addedDate).toLocaleDateString("en-US", { month: "short" });
+            if (item.dateAdded) {
+                const month = new Date(item.dateAdded).toLocaleDateString("en-US", { month: "short" });
                 monthlyData[month] = (monthlyData[month] || 0) + 1;
             }
         });
@@ -78,14 +78,14 @@ export default function ClosetAnalytics() {
 
         // Wishlist stats
         const wishlistCount = items.filter((item) => item.wishlist).length;
-        const wishlistValue = items.filter((item) => item.wishlist).reduce((sum, item) => sum + (item.cost || 0), 0);
+        const wishlistValue = items.filter((item) => item.wishlist).reduce((sum, item) => sum + (item.price || 0), 0);
 
         // Average costs
         const avgClothingCost = clothingItems.length > 0
-            ? clothingItems.reduce((sum, item) => sum + (item.cost || 0), 0) / clothingItems.length
+            ? clothingItems.reduce((sum, item) => sum + (item.price || 0), 0) / clothingItems.length
             : 0;
         const avgMakeupCost = makeupItems.length > 0
-            ? makeupItems.reduce((sum, item) => sum + (item.cost || 0), 0) / makeupItems.length
+            ? makeupItems.reduce((sum, item) => sum + (item.price || 0), 0) / makeupItems.length
             : 0;
 
         return {
@@ -103,7 +103,7 @@ export default function ClosetAnalytics() {
             colorData,
             monthlyData: monthlyChartData,
         };
-    }, [items, looks]);
+    }, [items, computedNow]);
 
     return (
         <div className="space-y-6">
@@ -143,7 +143,7 @@ export default function ClosetAnalytics() {
                         <span className="text-xs font-medium">Wishlist</span>
                     </div>
                     <div className="text-2xl font-bold">{analytics.wishlistCount}</div>
-                    <div className="text-xs text-white/50 mt-1">${analytics.wishlistValue.toFixed(0)} value</div>
+                    <div className="text-xs text-white/90 font-medium mt-1">${analytics.wishlistValue.toFixed(0)} value</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-xl p-4 border border-purple-500/20">
@@ -152,7 +152,7 @@ export default function ClosetAnalytics() {
                         <span className="text-xs font-medium">Avg Cost</span>
                     </div>
                     <div className="text-xl font-bold">${analytics.avgClothingCost.toFixed(0)}</div>
-                    <div className="text-xs text-white/50 mt-1">Makeup: ${analytics.avgMakeupCost.toFixed(0)}</div>
+                    <div className="text-xs text-white/90 font-medium mt-1">Makeup: ${analytics.avgMakeupCost.toFixed(0)}</div>
                 </div>
             </div>
 
@@ -171,7 +171,7 @@ export default function ClosetAnalytics() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium truncate">{item.name}</div>
-                                    <div className="text-xs text-white/50">{item.category}</div>
+                                    <div className="text-xs text-white/90 font-medium">{item.category}</div>
                                 </div>
                                 <div className="text-sm font-medium text-purple-400">{item.wears}x</div>
                             </div>
@@ -193,7 +193,7 @@ export default function ClosetAnalytics() {
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium truncate">{item.name}</div>
                                     <div className="text-xs text-white/70">
-                                        ${(item as any).cost?.toFixed(0)} ÷ {item.wears} wears
+                                           ${(item.price || 0).toFixed(0)} ÷ {item.wears} wears
                                     </div>
                                 </div>
                                 <div className="text-sm font-medium text-green-400">${item.cpw.toFixed(2)}</div>
@@ -256,7 +256,7 @@ export default function ClosetAnalytics() {
                                 />
                                 <div className="flex-1">
                                     <div className="text-sm font-medium">{color.name}</div>
-                                    <div className="text-xs text-white/50">{color.value} items</div>
+                                    <div className="text-xs text-white/90 font-medium">{color.value} items</div>
                                 </div>
                                 <div className="text-sm font-medium text-white/60">
                                     {Math.round((color.value / analytics.totalItems) * 100)}%
