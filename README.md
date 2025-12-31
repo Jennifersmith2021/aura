@@ -47,6 +47,10 @@ GOOGLE_API_KEY=your_key_here
 # Use local Amazon adapter (FastAPI + amazon-mcp)
 USE_LOCAL_RETAILER_ADAPTER=true
 RETAILER_ADAPTER_URL=http://localhost:8001
+
+# NextAuth (credentials) and database
+AUTH_SECRET=your_nextauth_secret
+DATABASE_URL=postgresql://user:password@localhost:5432/aura
 ```
 
 ### 3. (Optional) Set up local Amazon adapter
@@ -77,7 +81,12 @@ docker-compose up -d
 npx prisma db push
 ```
 
-### 5. Run the development server
+### 5. (Optional) Enable authentication and sync
+
+- Provide `AUTH_SECRET` (or `NEXTAUTH_SECRET`) and `DATABASE_URL` in `.env.local`.
+- Start the app (below), then visit `/login` to create an account (POST `/api/register`) and sign in. Data syncs to your account via `/api/sync/items`.
+
+### 6. Run the development server
 
 ```powershell
 npm run dev

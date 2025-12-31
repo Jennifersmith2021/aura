@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { Sidebar } from "@/components/Sidebar";
 import { Navigation } from "@/components/Navigation";
 import { PageTransition } from "@/components/PageTransition";
+import { AppProviders } from "@/components/AppProviders";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,15 +25,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen pb-20`}
+        className={`${inter.variable} antialiased bg-background text-foreground min-h-screen pb-20 lg:pb-0`}
       >
-        <main className="max-w-md mx-auto min-h-screen bg-background shadow-2xl shadow-black/5 overflow-hidden relative">
-          {/* Mobile-first container */}
-          <PageTransition className="min-h-screen">
-            {children}
-          </PageTransition>
-        </main>
-        <Navigation />
+        <AppProviders>
+          <div className="flex h-screen overflow-hidden">
+            {/* Desktop Sidebar */}
+            <Sidebar />
+            
+            {/* Main Content */}
+            <main className="flex-1 overflow-y-auto bg-background">
+              <PageTransition className="min-h-screen">
+                {children}
+              </PageTransition>
+            </main>
+          </div>
+          
+          {/* Mobile Bottom Navigation */}
+          <Navigation />
+        </AppProviders>
       </body>
     </html>
   );

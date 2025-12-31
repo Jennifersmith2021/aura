@@ -350,6 +350,59 @@ npm run test:e2e  # Run tests if applicable
 
 ---
 
+## 🎯 Future Feature Ideas
+
+### UI/UX Improvements
+- [ ] **Dark mode toggle** - Manual toggle instead of just auto-detect
+- [ ] **Progress photos timeline** - Visual before/after gallery with date filtering
+- [ ] **Search functionality** - Search across closet, goals, logs, achievements
+- [ ] **Export/Import data** - Backup and restore all data as JSON
+- [ ] **Notifications/Reminders** - Daily affirmations, goal check-ins, chastity milestones
+- [ ] **Onboarding tutorial** - First-time user walkthrough with feature highlights
+
+### Sissy Training Enhancements
+- [ ] **Daily sissy tasks/checklist** - Morning routine tracker (makeup, outfit, affirmations)
+- [ ] **Sissy contracts** - Create and track commitments with rules and consequences
+- [ ] **Punishment/Reward system** - Track discipline and rewards tied to goal completion
+- [ ] **Sissy name generator** - Help choose a feminine name with suggestions
+- [ ] **Voice training exercises** - Built-in pitch analyzer and practice routines
+- [ ] **Posture timer** - Reminders to maintain feminine posture throughout day
+
+### Social/Community Features
+- [ ] **Share looks anonymously** - Optional community sharing (no personal data)
+- [ ] **Milestone celebrations** - Confetti/animations when achieving major goals
+- [ ] **Sister sissy feature** - Buddy system for mutual support/accountability
+
+### Analytics & Insights
+- [ ] **Weekly/Monthly reports** - Progress summary with charts and graphs
+- [ ] **Habit streaks** - Track consecutive days of training/chastity/denial
+- [ ] **Goal recommendations** - AI suggests next goals based on progress
+- [ ] **Spending tracker** - Budget tracking for wardrobe/makeup purchases
+
+### Wardrobe Enhancements
+- [ ] **Default fashion guidance** - Built-in style guides for different occasions and body types
+- [ ] **Outfit planning calendar** - Schedule outfits for upcoming days
+- [ ] **Weather-based suggestions** - Outfit recommendations based on weather
+- [ ] **Color coordination helper** - Suggests matching items from closet
+- [ ] **Wishlist prioritization** - Rank wishlist items by need/urgency
+
+### Beauty & Self-Care
+- [ ] **Makeup tutorials library** - Step-by-step guides with images/videos
+- [ ] **Makeup application order guide** - Proper order with beard cover techniques
+- [ ] **Default makeup guidance** - Built-in guides for beginners with product recommendations
+- [ ] **Nail art tracker** - Log manicures with photos and colors used
+- [ ] **Perfume collection** - Track scents with notes and occasions
+- [ ] **Body hair removal schedule** - Track sessions and regrowth patterns
+
+### Intimate Features
+- [ ] **Sissy hypno playlist** - Audio affirmations and guided sessions
+- [ ] **Edging tracker** - Count edges during denial periods
+- [ ] **Cage size progression** - Track downsizing in chastity training
+- [ ] **Dildo training log** - Size progression and time goals
+- [ ] **Orgasm quality ratings** - Rate intensity, method, satisfaction level
+
+---
+
 ## 📂 Project Structure Reference
 
 ```

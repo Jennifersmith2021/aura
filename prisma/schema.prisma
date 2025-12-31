@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = "postgresql://dummy:dummy@localhost:5432/dummy"
+  url      = env("DATABASE_URL")
 }
 
 // Enums
@@ -32,6 +32,56 @@ enum SessionStatus {
   FAILED
 }
 
+// Auth (NextAuth) models
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  passwordHash   String?
+
+  accounts       Account[]
+  sessions       Session[]
+  items          Item[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 // Models
 
 model Item {
@@ -49,11 +99,15 @@ model Item {
   notes        String?
   tags         String[]
   status       ItemStatus @default(ACTIVE)
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   looks        Look[]   @relation("LookItems")
+
+  @@index([userId])
 }
 
 model Look {

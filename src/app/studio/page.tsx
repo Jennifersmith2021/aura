@@ -30,16 +30,23 @@ import AchievementBadges from "@/components/AchievementBadges";
 import SmartMirror from "@/components/SmartMirror";
 import DailyAffirmations from "@/components/DailyAffirmations";
 import ProgressPhotoGallery from "@/components/ProgressPhotoGallery";
+import OutfitSimulator from "@/components/OutfitSimulator";
+import WardrobePlanner from "@/components/WardrobePlanner";
+import ColorAnalyzer from "@/components/ColorAnalyzer";
+import StyleAdvisor from "@/components/StyleAdvisor";
+import WeatherOutfitSuggester from "@/components/WeatherOutfitSuggester";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { cn } from "@/lib/utils";
 
-type Tab = "looks" | "journey" | "stats" | "guide" | "color" | "shop" | "inspo" | "love" | "social" | "games";
+type Tab = "looks" | "journey" | "stats" | "guide" | "color" | "shop" | "inspo" | "love" | "social" | "games" | "outfits" | "planner";
 
 export default function StudioPage() {
     const [activeTab, setActiveTab] = useState<Tab>("looks");
 
     const tabs: { id: Tab; label: string }[] = [
         { id: "looks", label: "Looks" },
+        { id: "outfits", label: "Outfit Mix" },
+        { id: "planner", label: "Planner" },
         { id: "journey", label: "Journey" },
         { id: "stats", label: "Stats" },
         { id: "guide", label: "Guide" },
@@ -80,6 +87,8 @@ export default function StudioPage() {
 
             <div className="flex-1">
                 {activeTab === "looks" && <Lookbook />}
+                {activeTab === "outfits" && <OutfitSimulator />}
+                {activeTab === "planner" && <WardrobePlanner />}
                 {activeTab === "journey" && (
                     <div className="space-y-8">
                         <DailyAffirmations />
@@ -98,13 +107,20 @@ export default function StudioPage() {
                 )}
                 {activeTab === "guide" && (
                     <div className="space-y-8">
+                        <WeatherOutfitSuggester />
+                        <StyleAdvisor />
                         <SmartMirror />
                         <EssentialsChecklist />
                         <SizeConversionChart />
                         <PackingListGenerator />
                     </div>
                 )}
-                {activeTab === "color" && <ColorAnalysis />}
+                {activeTab === "color" && (
+                    <div className="space-y-8">
+                        <ColorAnalyzer />
+                        <ColorAnalysis />
+                    </div>
+                )}
                 {activeTab === "shop" && <ShoppingRecommendations />}
                 {activeTab === "inspo" && <InspirationBoard />}
                 {activeTab === "love" && (

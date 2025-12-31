@@ -17,10 +17,12 @@ export function ShoppingRecommendations() {
     const [hasGenerated, setHasGenerated] = useState(false);
 
     const generateRecommendations = async () => {
+        console.log("Generate recommendations button clicked!");
         setLoading(true);
         try {
             // Simplify context to save tokens
             const context = items.map(i => ({ name: i.name, type: i.type, category: i.category }));
+            console.log("Sending context:", context);
 
             const res = await fetch("/api/gemini", {
                 method: "POST",
@@ -31,16 +33,93 @@ export function ShoppingRecommendations() {
                 }),
             });
 
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error("API Error:", errorData);
+                
+                // If missing API key, use fallback recommendations
+                if (errorData.error?.includes("Missing API Key") || errorData.error?.includes("API Key")) {
+                    console.log("Using fallback recommendations (no API key configured)");
+                    const fallbackRecs = generateFallbackRecommendations(items);
+                    setRecommendations(fallbackRecs);
+                    setHasGenerated(true);
+                    return;
+                }
+                
+                alert(`Failed to generate recommendations: ${errorData.error || 'Unknown error'}`);
+                return;
+            }
+
             const data = await res.json();
+            console.log("Received data:", data);
+            
             if (data.recommendations) {
                 setRecommendations(data.recommendations);
                 setHasGenerated(true);
+            } else if (data.error) {
+                console.error("API returned error:", data.error);
+                alert(`Error: ${data.error}`);
+            } else {
+                console.error("Unexpected response format:", data);
+                alert("Received unexpected response format from API");
             }
         } catch (error) {
             console.error("Failed to get recommendations", error);
+            alert(`Error: ${error instanceof Error ? error.message : 'Failed to generate recommendations'}`);
         } finally {
             setLoading(false);
         }
+    };
+
+    const generateFallbackRecommendations = (userItems: typeof items): Recommendation[] => {
+        const hasClothing = userItems.some(i => i.type === "clothing");
+        const hasMakeup = userItems.some(i => i.type === "makeup");
+        const hasDresses = userItems.some(i => i.category === "dress");
+        const hasShoes = userItems.some(i => i.category === "shoe");
+        const hasLips = userItems.some(i => i.category === "lip");
+        const hasEyes = userItems.some(i => i.category === "eye");
+
+        const recs: Recommendation[] = [];
+
+        if (!hasDresses || userItems.filter(i => i.category === "dress").length < 3) {
+            recs.push({
+                name: "Little Black Dress",
+                reason: "A versatile classic that pairs with any accessories and works for multiple occasions",
+                category: "clothing"
+            });
+        }
+
+        if (!hasShoes || userItems.filter(i => i.category === "shoe").length < 2) {
+            recs.push({
+                name: "Nude Heels",
+                reason: "Essential footwear that elongates legs and complements any outfit",
+                category: "clothing"
+            });
+        }
+
+        recs.push({
+            name: "Statement Belt",
+            reason: "Perfect for cinching waists and adding definition to dresses and tops",
+            category: "clothing"
+        });
+
+        if (!hasLips || userItems.filter(i => i.category === "lip").length < 2) {
+            recs.push({
+                name: "Classic Red Lipstick",
+                reason: "A timeless essential that adds instant glamour and confidence",
+                category: "makeup"
+            });
+        }
+
+        if (!hasEyes) {
+            recs.push({
+                name: "Neutral Eyeshadow Palette",
+                reason: "Versatile everyday colors for natural to dramatic looks",
+                category: "makeup"
+            });
+        }
+
+        return recs.slice(0, 5);
     };
 
     return (
@@ -55,9 +134,13 @@ export function ShoppingRecommendations() {
                         Let Aura analyze your closet and vanity to suggest the perfect additions to your collection.
                     </p>
                     <button
-                        onClick={generateRecommendations}
+                        onClick={() => {
+                            console.log("Button clicked - direct handler");
+                            generateRecommendations();
+                        }}
                         disabled={loading}
-                        className="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-2 mx-auto"
+                        type="button"
+                        className="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-2 mx-auto cursor-pointer"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                         Generate Recommendations

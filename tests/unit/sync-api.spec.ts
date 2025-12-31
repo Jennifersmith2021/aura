@@ -21,7 +21,7 @@ test.describe('Sync API Routes', () => {
     });
 
     // Either 501 (not configured) or 200 (if DB is set up)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     expect([200, 501]).toContain(response.status());
   });
 

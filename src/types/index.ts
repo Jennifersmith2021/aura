@@ -1,5 +1,5 @@
 export type Category =
-    | "top" | "bottom" | "dress" | "shoe" | "outerwear" | "accessory" // Clothing
+    | "top" | "bottom" | "dress" | "shoe" | "outerwear" | "accessory" | "legging" // Clothing
     | "face" | "eye" | "lip" | "cheek" | "tool" // Makeup
     | "other";
 
@@ -8,6 +8,7 @@ export interface Item {
     name: string;
     type: "clothing" | "makeup";
     category: Category;
+    userId?: string;
     color?: string;
     image?: string; // Base64 or URL
     purchaseUrl?: string;
@@ -46,6 +47,12 @@ export interface MeasurementLog {
         weight?: number;
         dressSize?: number;
         shoeSize?: number; // Redundant but explicit
+        braBand?: number; // e.g., 34
+        braCup?: string; // e.g., B, C, DD
+        breast?: number; // bust circumference at fullest point
+        butt?: number; // hip/seat circumference at fullest point
+        clitLengthMm?: number; // clit length in millimeters
+        clitGirthMm?: number; // clit girth in millimeters
     };
     photo?: string;
     goalWaist?: number; // Target waist measurement
@@ -65,6 +72,9 @@ export interface ArousalLog {
     id: string;
     date: number;
     level: number; // 1-10 scale
+    sessionType?: "arousal" | "edging" | "denial" | "afterglow";
+    durationMinutes?: number;
+    stimulus?: string; // e.g., wand, anal, vibe, nipple play
     mood?: string;
     note?: string;
     cycleDay?: number; // Optional menstrual cycle day tracking
@@ -90,6 +100,18 @@ export interface IntimacyEntry {
     tags?: string[]; // Custom tags for filtering
     linkedActivity?: string; // Optional link to activity (chastity session, orgasm, etc.)
     isPrivate?: boolean; // Extra privacy flag
+}
+
+export interface MakeupTutorial {
+    id: string;
+    title: string;
+    source?: string;
+    focus?: string;
+    difficulty?: "beginner" | "intermediate" | "advanced";
+    status: "planned" | "in-progress" | "done";
+    practiceCount: number;
+    lastPracticed?: number;
+    note?: string;
 }
 
 export interface SkincareProduct {

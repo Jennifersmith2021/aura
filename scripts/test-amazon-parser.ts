@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import fs from 'fs';
 import path from 'path';
@@ -18,7 +19,7 @@ class MockFile {
     }
 
     // PapaParse in the browser uses the File object directly, but in Node with our mock, 
-    // we might need to adjust how we call it or mock the File API better.
+        /* eslint-disable @typescript-eslint/no-explicit-any */
     // However, the amazonParser uses Papa.parse(file, ...). 
     // PapaParse supports strings, files, etc.
     // Let's see if we can just pass the content as a string if we modify the parser, 

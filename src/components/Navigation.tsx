@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Shirt, Sparkles, Scissors, Menu, Brush, ShoppingBag, Dumbbell } from "lucide-react";
+import { Home, Shirt, Sparkles, Menu, Brush, ShoppingBag, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Navigation() {
@@ -12,16 +12,13 @@ export function Navigation() {
         { href: "/", label: "Home", icon: Home },
         { href: "/closet", label: "Closet", icon: Shirt },
         { href: "/shopping", label: "Shop", icon: ShoppingBag },
-        { href: "/vanity", label: "Vanity", icon: Brush },
-        { href: "/fitting-room", label: "Try On", icon: Scissors },
+        { href: "/analytics", label: "Analytics", icon: TrendingUp },
         { href: "/studio", label: "Studio", icon: Menu },
-        { href: "/stylist", label: "Ask Aura", icon: Sparkles },
-        { href: "/training", label: "Training", icon: Dumbbell },
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-border z-50 pb-safe">
-            <div className="flex items-center justify-around h-16 max-w-md mx-auto px-4">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-border z-50 pb-safe lg:hidden">
+            <div className="flex items-center justify-around h-16 px-4">
                 {links.map((link) => {
                     const Icon = link.icon;
                     const isActive = pathname === link.href;

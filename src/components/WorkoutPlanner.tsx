@@ -1,17 +1,55 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useStore } from "@/hooks/useStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, Dumbbell, Play } from "lucide-react";
 import clsx from "clsx";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const DEFAULT_WORKOUTS = [
+    {
+        day: "Monday" as const,
+        exercises: [
+            { name: "Warm-up: Light Cardio", sets: 1, reps: 5, notes: "Walking or light jogging" },
+            { name: "Glute Bridges", sets: 3, reps: 15 },
+            { name: "Lateral Leg Raises", sets: 3, reps: 12 },
+            { name: "Squats", sets: 3, reps: 15 },
+            { name: "Stretch: 10 minutes" },
+        ],
+        notes: "Glute & Hip Focus Day"
+    },
+    {
+        day: "Wednesday" as const,
+        exercises: [
+            { name: "Warm-up: Light Cardio", sets: 1, reps: 5 },
+            { name: "Planks", sets: 3, duration: 30 },
+            { name: "Side Planks", sets: 3, duration: 20 },
+            { name: "Russian Twists", sets: 3, reps: 20 },
+            { name: "Stretch: 10 minutes" },
+        ],
+        notes: "Core & Waist Cinching"
+    },
+    {
+        day: "Friday" as const,
+        exercises: [
+            { name: "Warm-up: Dynamic Stretching", sets: 1 },
+            { name: "Incline Push-ups", sets: 3, reps: 10 },
+            { name: "Tricep Dips", sets: 3, reps: 10 },
+            { name: "Bicep Curls (light)", sets: 3, reps: 12 },
+            { name: "Full Body Stretch", sets: 1 },
+        ],
+        notes: "Upper Body Toning"
+    },
+];
 
 type Exercise = {
     name: string;
     sets?: number;
     reps?: number;
     weight?: number;
+    duration?: number;
     notes?: string;
     youtubeUrl?: string;
 };
@@ -20,12 +58,28 @@ export function WorkoutPlanner() {
     const { workoutPlans, addWorkoutPlan, removeWorkoutPlan, updateWorkoutPlan } = useStore();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditingId, setIsEditingId] = useState<string | null>(null);
+    const [hasInitialized, setHasInitialized] = useState(false);
 
     // Form state
     const [dayOfWeek, setDayOfWeek] = useState<typeof DAYS[number]>("Monday");
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [notes, setNotes] = useState("");
     const [newExercise, setNewExercise] = useState<Exercise>({ name: "" });
+
+    // Initialize default workouts on first load
+    useEffect(() => {
+        if (workoutPlans.length === 0 && !hasInitialized) {
+            DEFAULT_WORKOUTS.forEach(workout => {
+                addWorkoutPlan({
+                    dayOfWeek: workout.day,
+                    exercises: workout.exercises,
+                    notes: workout.notes,
+                    date: Date.now()
+                });
+            });
+            setHasInitialized(true);
+        }
+    }, [workoutPlans.length, hasInitialized, addWorkoutPlan]);
 
     const editingItem = isEditingId ? workoutPlans.find(p => p.id === isEditingId) : null;
     const plansByDay = DAYS.map(day => ({

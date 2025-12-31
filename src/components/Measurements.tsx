@@ -1,9 +1,10 @@
 "use client";
+/* eslint-disable react/no-unescaped-entities */
 
 import { useStore } from "@/hooks/useStore";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Save, Scale, Ruler, Footprints } from "lucide-react";
+import { Save, Scale, Ruler, Footprints, Camera, Sparkles, Droplets } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 export function Measurements() {
@@ -18,7 +19,14 @@ export function Measurements() {
         shoeSize: "",
         goalWaist: "",
         goalWHR: "",
+        braBand: "",
+        braCup: "",
+        breast: "",
+        butt: "",
+        clitLengthMm: "",
+        clitGirthMm: "",
     });
+    const [photoData, setPhotoData] = useState<string | undefined>(undefined);
 
     // Get latest measurement for current display
     const latest = measurements.length > 0 ? measurements[0] : null;
@@ -39,6 +47,16 @@ export function Measurements() {
         ? ((1 - Math.abs(parseFloat(whr) - goalWHR) / goalWHR) * 100).toFixed(1)
         : null;
 
+    const handlePhotoChange = (file: File | null) => {
+        if (!file) {
+            setPhotoData(undefined);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => setPhotoData(reader.result as string);
+        reader.readAsDataURL(file);
+    };
+
     const handleSave = () => {
         addMeasurement({
             id: uuidv4(),
@@ -50,12 +68,35 @@ export function Measurements() {
                 weight: parseFloat(form.weight) || undefined,
                 dressSize: parseFloat(form.dressSize) || undefined,
                 shoeSize: parseFloat(form.shoeSize) || undefined,
+                braBand: parseFloat(form.braBand) || undefined,
+                braCup: form.braCup || undefined,
+                breast: parseFloat(form.breast) || undefined,
+                butt: parseFloat(form.butt) || undefined,
+                clitLengthMm: parseFloat(form.clitLengthMm) || undefined,
+                clitGirthMm: parseFloat(form.clitGirthMm) || undefined,
             },
+            photo: photoData,
             goalWaist: parseFloat(form.goalWaist) || undefined,
             goalWHR: parseFloat(form.goalWHR) || undefined,
         });
         setIsAdding(false);
-        setForm({ bust: "", waist: "", hips: "", weight: "", dressSize: "", shoeSize: "", goalWaist: "", goalWHR: "" });
+        setForm({
+            bust: "",
+            waist: "",
+            hips: "",
+            weight: "",
+            dressSize: "",
+            shoeSize: "",
+            goalWaist: "",
+            goalWHR: "",
+            braBand: "",
+            braCup: "",
+            breast: "",
+            butt: "",
+            clitLengthMm: "",
+            clitGirthMm: "",
+        });
+        setPhotoData(undefined);
     };
 
     // Prepare data for chart (reverse to show oldest first)
@@ -65,7 +106,11 @@ export function Measurements() {
         waist: m.values.waist,
         hips: m.values.hips,
         weight: m.values.weight,
+        butt: m.values.butt,
+        breast: m.values.breast,
     }));
+
+    const latestPhotos = useMemo(() => measurements.filter(m => m.photo).slice(0, 4), [measurements]);
 
     return (
         <div className="space-y-6">
@@ -89,6 +134,36 @@ export function Measurements() {
                                 <div className="text-lg font-bold flex items-center gap-1">
                                     <Scale className="w-4 h-4 text-primary" />
                                     {latestValues.weight} <span className="text-xs font-normal">lbs</span>
+                                </div>
+                            </div>
+                        )}
+                        {latestValues.butt && (
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-border flex flex-col items-center">
+                                <span className="text-xs text-muted-foreground uppercase font-medium">Butt / Seat</span>
+                                <div className="text-lg font-bold flex items-center gap-1">
+                                    <Ruler className="w-4 h-4 text-pink-500" />
+                                    {latestValues.butt}
+                                    <span className="text-xs font-normal">"</span>
+                                </div>
+                            </div>
+                        )}
+                        {latestValues.breast && (
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-border flex flex-col items-center">
+                                <span className="text-xs text-muted-foreground uppercase font-medium">Breast</span>
+                                <div className="text-lg font-bold flex items-center gap-1">
+                                    <Sparkles className="w-4 h-4 text-rose-500" />
+                                    {latestValues.breast}
+                                    <span className="text-xs font-normal">"</span>
+                                </div>
+                            </div>
+                        )}
+                        {latestValues.braBand && (
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-border flex flex-col items-center">
+                                <span className="text-xs text-muted-foreground uppercase font-medium">Bra Size</span>
+                                <div className="text-lg font-bold flex items-center gap-1">
+                                    <Droplets className="w-4 h-4 text-purple-500" />
+                                    {latestValues.braBand}
+                                    {latestValues.braCup && <span className="text-base">{latestValues.braCup}</span>}
                                 </div>
                             </div>
                         )}
@@ -177,6 +252,15 @@ export function Measurements() {
                             />
                         </div>
                         <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase text-muted-foreground">Breast (fullest)</label>
+                            <input
+                                type="number"
+                                className="w-full p-2 rounded-lg border border-border"
+                                value={form.breast}
+                                onChange={(e) => setForm({ ...form, breast: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-1">
                             <label className="text-xs font-medium uppercase text-muted-foreground">Waist</label>
                             <input
                                 type="number"
@@ -192,6 +276,15 @@ export function Measurements() {
                                 className="w-full p-2 rounded-lg border border-border"
                                 value={form.hips}
                                 onChange={(e) => setForm({ ...form, hips: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase text-muted-foreground">Butt / Seat</label>
+                            <input
+                                type="number"
+                                className="w-full p-2 rounded-lg border border-border"
+                                value={form.butt}
+                                onChange={(e) => setForm({ ...form, butt: e.target.value })}
                             />
                         </div>
                         <div className="space-y-1">
@@ -221,6 +314,63 @@ export function Measurements() {
                                 onChange={(e) => setForm({ ...form, shoeSize: e.target.value })}
                             />
                         </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase text-muted-foreground">Bra Band</label>
+                            <input
+                                type="number"
+                                className="w-full p-2 rounded-lg border border-border"
+                                value={form.braBand}
+                                onChange={(e) => setForm({ ...form, braBand: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase text-muted-foreground">Bra Cup</label>
+                            <input
+                                type="text"
+                                className="w-full p-2 rounded-lg border border-border"
+                                value={form.braCup}
+                                onChange={(e) => setForm({ ...form, braCup: e.target.value.toUpperCase() })}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase text-muted-foreground">Clit Length (mm)</label>
+                            <input
+                                type="number"
+                                className="w-full p-2 rounded-lg border border-border"
+                                value={form.clitLengthMm}
+                                onChange={(e) => setForm({ ...form, clitLengthMm: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase text-muted-foreground">Clit Girth (mm)</label>
+                            <input
+                                type="number"
+                                className="w-full p-2 rounded-lg border border-border"
+                                value={form.clitGirthMm}
+                                onChange={(e) => setForm({ ...form, clitGirthMm: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase text-muted-foreground">Progress Photo (optional)</label>
+                        <div className="flex items-center gap-3">
+                            <label className="cursor-pointer px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold flex items-center gap-2">
+                                <Camera className="w-4 h-4" />
+                                {photoData ? "Replace Photo" : "Add Photo"}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handlePhotoChange(e.target.files?.[0] || null)}
+                                />
+                            </label>
+                            {photoData && (
+                                <div className="w-16 h-16 rounded-lg overflow-hidden border border-border">
+                                    <img src={photoData} alt="measurement" className="w-full h-full object-cover" />
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Use the same angle and distance each time to see growth clearly.</p>
                     </div>
                     <div className="border-t border-border pt-3 mt-3">
                         <div className="text-xs font-semibold uppercase text-muted-foreground mb-3">Goals (Optional)</div>
@@ -256,6 +406,28 @@ export function Measurements() {
                         <Save className="w-4 h-4" />
                         Save Log
                     </button>
+                </div>
+            )}
+
+            {/* Photo history */}
+            {latestPhotos.length > 0 && (
+                <div className="space-y-2">
+                    <div className="text-sm font-semibold flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-pink-500" />
+                        Measurement Photos
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {latestPhotos.map((entry) => (
+                            <div key={entry.id} className="rounded-lg overflow-hidden border border-border bg-slate-50 dark:bg-slate-800">
+                                {entry.photo && (
+                                    <img src={entry.photo} alt="measurement" className="w-full h-32 object-cover" />
+                                )}
+                                <div className="p-2 text-xs text-muted-foreground font-semibold">
+                                    {new Date(entry.date).toLocaleDateString()}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 

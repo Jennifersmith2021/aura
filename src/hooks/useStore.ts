@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { get, set, del } from "idb-keyval";
-import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle, SissyTrainingGoal, SissyTrainingLog, ComplimentEntry, PackingList, SupplementLog, WorkoutPlan, WorkoutSession, DailyAffirmation } from "@/types";
+import { v4 as uuidv4 } from "uuid";
+import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle, SissyTrainingGoal, SissyTrainingLog, ComplimentEntry, PackingList, SupplementLog, WorkoutPlan, WorkoutSession, DailyAffirmation, MakeupTutorial } from "@/types";
 
 
 export function useStore() {
@@ -36,6 +37,7 @@ export function useStore() {
     const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
     const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
     const [dailyAffirmations, setDailyAffirmations] = useState<DailyAffirmation[]>([]);
+    const [makeupTutorials, setMakeupTutorials] = useState<MakeupTutorial[]>([]);
     
     const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,7 @@ export function useStore() {
     useEffect(() => {
         async function loadData() {
             try {
-                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists, storedSupplements, storedWorkoutPlans, storedWorkoutSessions, storedDailyAffirmations] = await Promise.all([
+                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists, storedSupplements, storedWorkoutPlans, storedWorkoutSessions, storedDailyAffirmations, storedMakeupTutorials] = await Promise.all([
                     get<Item[]>("items"),
                     get<Look[]>("looks"),
                     get<MeasurementLog[]>("measurements"),
@@ -71,6 +73,7 @@ export function useStore() {
                     get<WorkoutPlan[]>("workoutPlans"),
                     get<WorkoutSession[]>("workoutSessions"),
                     get<DailyAffirmation[]>("dailyAffirmations"),
+                    get<MakeupTutorial[]>("makeupTutorials"),
                 ]);
 
                 if (storedItems) setItems(storedItems);
@@ -92,7 +95,135 @@ export function useStore() {
                 if (storedClitMeasurements) setClitMeasurements(storedClitMeasurements);
                 if (storedWigCollection) setWigCollection(storedWigCollection);
                 if (storedHairStyles) setHairStyles(storedHairStyles);
-                if (storedSissyGoals) setSissyGoals(storedSissyGoals);
+                if (storedSissyGoals) {
+                    setSissyGoals(storedSissyGoals);
+                } else {
+                    // Initialize with default preset goals
+                    const defaultGoals: SissyTrainingGoal[] = [
+                        {
+                            id: 'default-1',
+                            title: "Master Makeup Application",
+                            category: "appearance",
+                            description: "Learn to apply full makeup flawlessly",
+                            completed: false,
+                            priority: "high",
+                            progress: 0,
+                            milestones: ["Learn foundation basics", "Master eye makeup", "Perfect lip application", "Blend like a pro"],
+                        },
+                        {
+                            id: 'default-2',
+                            title: "Develop Feminine Voice",
+                            category: "skills",
+                            description: "Practice feminine voice and speech patterns",
+                            completed: false,
+                            priority: "high",
+                            progress: 0,
+                            milestones: ["Raise pitch", "Soften tone", "Practice inflection", "Build confidence"],
+                        },
+                        {
+                            id: 'default-3',
+                            title: "Build Complete Wardrobe",
+                            category: "appearance",
+                            description: "Acquire essential feminine clothing items",
+                            completed: false,
+                            priority: "medium",
+                            progress: 0,
+                            milestones: ["Get first dress", "Buy lingerie sets", "Acquire heels", "Complete accessories"],
+                        },
+                        {
+                            id: 'default-4',
+                            title: "Perfect Feminine Walk",
+                            category: "behavior",
+                            description: "Learn to walk gracefully in heels",
+                            completed: false,
+                            priority: "medium",
+                            progress: 0,
+                            milestones: ["Practice balance", "Hip sway", "Posture correction", "Confidence in public"],
+                        },
+                        {
+                            id: 'default-5',
+                            title: "Embrace Sissy Mindset",
+                            category: "mindset",
+                            description: "Accept and celebrate your sissy nature",
+                            completed: false,
+                            priority: "high",
+                            progress: 0,
+                            milestones: ["Daily affirmations", "Self-acceptance", "Confidence building", "Embrace femininity"],
+                        },
+                        {
+                            id: 'default-6',
+                            title: "Achieve Hourglass Figure",
+                            category: "fitness",
+                            description: "Develop feminine body shape through training",
+                            completed: false,
+                            priority: "medium",
+                            progress: 0,
+                            milestones: ["Start waist training", "Hip exercises", "Weight management", "Track measurements"],
+                        },
+                        {
+                            id: 'default-7',
+                            title: "Serve with Devotion",
+                            category: "intimate",
+                            description: "Learn to serve and please properly",
+                            completed: false,
+                            priority: "medium",
+                            progress: 0,
+                            milestones: ["Study techniques", "Practice positions", "Develop eagerness", "Perfect service"],
+                        },
+                        {
+                            id: 'default-8',
+                            title: "Master Chastity Discipline",
+                            category: "intimate",
+                            description: "Maintain long-term chastity with devotion",
+                            completed: false,
+                            priority: "high",
+                            progress: 0,
+                            milestones: ["Week locked", "Month locked", "Handle denial", "Find pleasure in chastity"],
+                        },
+                        {
+                            id: 'default-9',
+                            title: "Plug Training Progress",
+                            category: "intimate",
+                            description: "Progress through butt plug sizes comfortably",
+                            completed: false,
+                            priority: "medium",
+                            progress: 0,
+                            milestones: ["Small plug comfort", "Wear for hours", "Medium size", "Large size mastery"],
+                        },
+                        {
+                            id: 'default-10',
+                            title: "Skincare Routine Excellence",
+                            category: "appearance",
+                            description: "Maintain flawless feminine skin",
+                            completed: false,
+                            priority: "low",
+                            progress: 0,
+                            milestones: ["Morning routine", "Evening routine", "Weekly treatments", "Perfect complexion"],
+                        },
+                        {
+                            id: 'default-11',
+                            title: "Graceful Mannerisms",
+                            category: "behavior",
+                            description: "Adopt feminine gestures and body language",
+                            completed: false,
+                            priority: "medium",
+                            progress: 0,
+                            milestones: ["Hand movements", "Sitting gracefully", "Eye contact", "Soft expressions"],
+                        },
+                        {
+                            id: 'default-12',
+                            title: "Hair & Wig Mastery",
+                            category: "appearance",
+                            description: "Style and maintain beautiful hair/wigs",
+                            completed: false,
+                            priority: "low",
+                            progress: 0,
+                            milestones: ["Choose right wig", "Styling techniques", "Natural look", "Confidence wearing"],
+                        },
+                    ];
+                    setSissyGoals(defaultGoals);
+                    set("sissyGoals", defaultGoals);
+                }
                 if (storedSissyLogs) setSissyLogs(storedSissyLogs);
                 if (storedCompliments) setCompliments(storedCompliments);
                 if (storedPackingLists) setPackingLists(storedPackingLists);
@@ -100,6 +231,7 @@ export function useStore() {
                 if (storedWorkoutPlans) setWorkoutPlans(storedWorkoutPlans);
                 if (storedWorkoutSessions) setWorkoutSessions(storedWorkoutSessions);
                 if (storedDailyAffirmations) setDailyAffirmations(storedDailyAffirmations);
+                if (storedMakeupTutorials) setMakeupTutorials(storedMakeupTutorials);
             } catch (err) {
                 console.error("Failed to load data", err);
             } finally {
@@ -111,27 +243,26 @@ export function useStore() {
 
     // Items
     const addItem = useCallback(async (item: Item) => {
-        setItems((prev) => {
-            const next = [...prev, item];
-            set("items", next);
-            return next;
-        });
-    }, []);
+        const next = [...items, item];
+        setItems(next);
+        await set("items", next);
+    }, [items]);
 
     const removeItem = useCallback(async (id: string) => {
-        setItems((prev) => {
-            const next = prev.filter((i) => i.id !== id);
-            set("items", next);
-            return next;
-        });
-    }, []);
+        const next = items.filter((i) => i.id !== id);
+        setItems(next);
+        await set("items", next);
+    }, [items]);
 
     const updateItem = useCallback(async (updated: Item) => {
-        setItems((prev) => {
-            const next = prev.map((i) => (i.id === updated.id ? updated : i));
-            set("items", next);
-            return next;
-        });
+        const next = items.map((i) => (i.id === updated.id ? updated : i));
+        setItems(next);
+        await set("items", next);
+    }, [items]);
+
+    const hydrateItems = useCallback((next: Item[]) => {
+        setItems(next);
+        set("items", next);
     }, []);
 
     // Looks
@@ -641,7 +772,7 @@ export function useStore() {
         setSupplements((prev) => {
             const next = [
                 ...prev,
-                { ...supplement, id: crypto.randomUUID() }
+                { ...supplement, id: uuidv4() }
             ].sort((a, b) => b.date - a.date);
             set("supplements", next);
             return next;
@@ -671,7 +802,7 @@ export function useStore() {
         setWorkoutPlans((prev) => {
             const next = [
                 ...prev,
-                { ...plan, id: crypto.randomUUID() }
+                { ...plan, id: uuidv4() }
             ].sort((a, b) => b.date - a.date);
             set("workoutPlans", next);
             return next;
@@ -700,7 +831,7 @@ export function useStore() {
         setWorkoutSessions((prev) => {
             const next = [
                 ...prev,
-                { ...session, id: crypto.randomUUID() }
+                { ...session, id: uuidv4() }
             ].sort((a, b) => b.date - a.date);
             set("workoutSessions", next);
             return next;
@@ -730,7 +861,7 @@ export function useStore() {
         setDailyAffirmations((prev) => {
             const next = [
                 ...prev,
-                { ...affirmation, id: crypto.randomUUID() }
+                { ...affirmation, id: uuidv4() }
             ].sort((a, b) => b.dateAdded - a.dateAdded);
             set("dailyAffirmations", next);
             return next;
@@ -765,9 +896,52 @@ export function useStore() {
         });
     }, []);
 
+    // Makeup Tutorials
+    const addMakeupTutorial = useCallback(async (tutorial: MakeupTutorial) => {
+        setMakeupTutorials((prev) => {
+            const next = [tutorial, ...prev];
+            set("makeupTutorials", next);
+            return next;
+        });
+    }, []);
+
+    const updateMakeupTutorial = useCallback(async (id: string, updates: Partial<MakeupTutorial>) => {
+        setMakeupTutorials((prev) => {
+            const next = prev.map((t) => (t.id === id ? { ...t, ...updates } : t));
+            set("makeupTutorials", next);
+            return next;
+        });
+    }, []);
+
+    const logMakeupPractice = useCallback(async (id: string) => {
+        setMakeupTutorials((prev) => {
+            const next = prev.map((t) =>
+                t.id === id
+                    ? {
+                        ...t,
+                        practiceCount: (t.practiceCount || 0) + 1,
+                        lastPracticed: Date.now(),
+                        status: t.status === "planned" ? "in-progress" : t.status,
+                    }
+                    : t
+            );
+            set("makeupTutorials", next);
+            return next;
+        });
+    }, []);
+
+    const removeMakeupTutorial = useCallback(async (id: string) => {
+        setMakeupTutorials((prev) => {
+            const next = prev.filter((t) => t.id !== id);
+            set("makeupTutorials", next);
+            return next;
+        });
+    }, []);
+
     return {
         loading,
         items,
+        hydrateItems,
         looks,
         measurements,
         timeline,
@@ -786,6 +960,7 @@ export function useStore() {
         clitMeasurements,
         wigCollection,
         hairStyles,
+        makeupTutorials,
         addItem,
         removeItem,
         updateItem,
@@ -868,5 +1043,9 @@ export function useStore() {
         removeDailyAffirmation,
         updateDailyAffirmation,
         toggleAffirmationFavorite,
+        addMakeupTutorial,
+        updateMakeupTutorial,
+        removeMakeupTutorial,
+        logMakeupPractice,
     };
 }

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useCallback, useEffect } from "react";
 import { Trophy, Target, Calendar, Zap, Check, X, Plus, Trash2, Play } from "lucide-react";
@@ -19,6 +20,7 @@ interface Challenge {
     completedDays: number[];
     rewards?: string;
     difficulty: "easy" | "medium" | "hard";
+    imageUrl?: string;
 }
 
 const categoryColors = {
@@ -54,6 +56,7 @@ const presetChallenges: Omit<Challenge, "id" | "startDate" | "completed" | "prog
         difficulty: "medium",
         dailyTasks: ["Wear makeup", "Style hair", "Choose feminine outfit", "Take progress photo"],
         rewards: "Master of Presentation badge",
+        imageUrl: "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=500&h=400&fit=crop&q=80",
     },
     {
         title: "Perfect Posture Challenge",
@@ -63,6 +66,7 @@ const presetChallenges: Omit<Challenge, "id" | "startDate" | "completed" | "prog
         difficulty: "easy",
         dailyTasks: ["Morning posture check", "Midday adjustment", "Evening review"],
         rewards: "Grace & Elegance badge",
+        imageUrl: "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=500&h=400&fit=crop&q=80",
     },
     {
         title: "Skincare Consistency",
@@ -72,6 +76,7 @@ const presetChallenges: Omit<Challenge, "id" | "startDate" | "completed" | "prog
         difficulty: "easy",
         dailyTasks: ["Morning routine", "Evening routine", "Moisturize throughout day"],
         rewards: "Glowing Skin achievement",
+        imageUrl: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=500&h=400&fit=crop&q=80",
     },
     {
         title: "Voice Feminization Practice",
@@ -81,6 +86,7 @@ const presetChallenges: Omit<Challenge, "id" | "startDate" | "completed" | "prog
         difficulty: "hard",
         dailyTasks: ["15min pitch exercises", "Record practice", "Conversation practice"],
         rewards: "Voice Master badge",
+        imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=400&fit=crop&q=80",
     },
     {
         title: "Waist Training Journey",
@@ -90,6 +96,115 @@ const presetChallenges: Omit<Challenge, "id" | "startDate" | "completed" | "prog
         difficulty: "hard",
         dailyTasks: ["Wear corset per schedule", "Log measurements", "Stretch exercises"],
         rewards: "Hourglass Figure milestone",
+    },
+    {
+        title: "Sissy Walk & Posture",
+        description: "Practice feminine walking and movement",
+        category: "confidence",
+        duration: 21,
+        difficulty: "medium",
+        dailyTasks: ["Practice heel walking 15min", "Hip sway exercises", "Sitting gracefully practice", "Mirror check"],
+        rewards: "Graceful Movement badge",
+        imageUrl: "https://images.unsplash.com/photo-1513161455079-7ef1a827fb4d?w=500&h=400&fit=crop&q=80",
+    },
+    {
+        title: "Sissy Wardrobe Building",
+        description: "Add one feminine item daily",
+        category: "style",
+        duration: 14,
+        difficulty: "easy",
+        dailyTasks: ["Research & select item", "Purchase or order", "Try on & photograph", "Document in closet"],
+        rewards: "Wardrobe Builder achievement",
+    },
+    {
+        title: "Panty Training",
+        description: "Wear panties exclusively",
+        category: "lifestyle",
+        duration: 30,
+        difficulty: "easy",
+        dailyTasks: ["Wear panties all day", "Select cute pair", "Feel feminine", "No boy underwear"],
+        rewards: "Panty Princess badge",
+    },
+    {
+        title: "Sissy Service Training",
+        description: "Practice domestic and personal service",
+        category: "intimacy",
+        duration: 30,
+        difficulty: "medium",
+        dailyTasks: ["Clean & organize space", "Practice serving posture", "Anticipate needs", "Log service acts"],
+        rewards: "Devoted Servant achievement",
+    },
+    {
+        title: "Makeup Mastery",
+        description: "Daily makeup application & experimentation",
+        category: "beauty",
+        duration: 30,
+        difficulty: "medium",
+        dailyTasks: ["Full face makeup", "Try new technique", "Take photos", "Practice blending"],
+        rewards: "Makeup Artist badge",
+    },
+    {
+        title: "Chastity Devotion",
+        description: "Maintain chastity with daily check-ins",
+        category: "intimacy",
+        duration: 30,
+        difficulty: "hard",
+        dailyTasks: ["Morning chastity affirmation", "Cage inspection", "Hygiene routine", "Log feelings"],
+        rewards: "Devoted & Locked achievement",
+    },
+    {
+        title: "Sissy Affirmations",
+        description: "Daily positive sissy affirmations",
+        category: "confidence",
+        duration: 21,
+        difficulty: "easy",
+        dailyTasks: ["Morning mirror affirmations", "Write gratitude list", "Evening reflection", "Share one affirmation"],
+        rewards: "Confident Sissy badge",
+    },
+    {
+        title: "Progressive Plug Training",
+        description: "Build up plug wearing time & size",
+        category: "intimacy",
+        duration: 30,
+        difficulty: "hard",
+        dailyTasks: ["Wear plug for target time", "Increase time weekly", "Log comfort level", "Practice anal hygiene"],
+        rewards: "Plug Training Master badge",
+    },
+    {
+        title: "24/7 Plugged",
+        description: "Wear a butt plug all day every day",
+        category: "intimacy",
+        duration: 7,
+        difficulty: "hard",
+        dailyTasks: ["Insert plug in morning", "Wear all day", "Remove only for hygiene", "Log experience"],
+        rewards: "Always Plugged achievement",
+    },
+    {
+        title: "Orgasm Denial Journey",
+        description: "30 days without cumming",
+        category: "intimacy",
+        duration: 30,
+        difficulty: "hard",
+        dailyTasks: ["Morning denial affirmation", "Track arousal level", "Edge if allowed", "No orgasms"],
+        rewards: "Denial Expert badge",
+    },
+    {
+        title: "Extended Denial",
+        description: "60 days of orgasm denial",
+        category: "intimacy",
+        duration: 60,
+        difficulty: "hard",
+        dailyTasks: ["Denial check-in", "Log frustration level", "Practice control", "No release"],
+        rewards: "Ultimate Denial Master achievement",
+    },
+    {
+        title: "Plug & Chastity Combo",
+        description: "Locked in chastity while plugged",
+        category: "intimacy",
+        duration: 14,
+        difficulty: "hard",
+        dailyTasks: ["Verify chastity cage", "Insert/verify plug", "Log feelings", "Double locked all day"],
+        rewards: "Fully Controlled achievement",
     },
 ];
 
@@ -199,8 +314,8 @@ export default function ChallengeSystem() {
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Target className="w-5 h-5 text-purple-400" />
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Target className="w-6 h-6 text-purple-400" />
                     Challenges
                 </h3>
                 <div className="flex gap-2">
@@ -227,16 +342,16 @@ export default function ChallengeSystem() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
                 <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-3 border border-purple-500/20">
-                    <div className="text-xs text-white/60 mb-1">Total</div>
-                    <div className="text-2xl font-bold">{challenges.length}</div>
+                    <div className="text-sm font-medium text-muted-foreground mb-1">Total</div>
+                    <div className="text-3xl font-bold">{challenges.length}</div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-3 border border-blue-500/20">
-                    <div className="text-xs text-white/60 mb-1">Active</div>
-                    <div className="text-2xl font-bold">{activeCount}</div>
+                    <div className="text-sm font-medium text-muted-foreground mb-1">Active</div>
+                    <div className="text-3xl font-bold">{activeCount}</div>
                 </div>
                 <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-3 border border-green-500/20">
-                    <div className="text-xs text-white/60 mb-1">Done</div>
-                    <div className="text-2xl font-bold">{completedCount}</div>
+                    <div className="text-sm font-medium text-muted-foreground mb-1">Done</div>
+                    <div className="text-3xl font-bold">{completedCount}</div>
                 </div>
             </div>
 
@@ -265,8 +380,8 @@ export default function ChallengeSystem() {
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="text-2xl">{categoryIcons[challenge.category]}</span>
                                             <div>
-                                                <h4 className="font-semibold text-white">{challenge.title}</h4>
-                                                <p className="text-xs text-white/70">{challenge.description}</p>
+                                                <h4 className="font-bold text-base text-foreground">{challenge.title}</h4>
+                                                <p className="text-sm text-muted-foreground font-medium">{challenge.description}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -296,12 +411,12 @@ export default function ChallengeSystem() {
 
                                 {/* Progress */}
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/50">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground font-medium">
                                             {challenge.duration} days • {challenge.difficulty}
                                         </span>
                                         {isActive && (
-                                            <span className="text-white/90 font-medium">
+                                            <span className="text-foreground font-bold">
                                                 Day {Math.min(daysElapsed + 1, challenge.duration)}/{challenge.duration}
                                             </span>
                                         )}
@@ -328,8 +443,8 @@ export default function ChallengeSystem() {
                 </div>
             ) : (
                 <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
-                    <Target className="w-12 h-12 text-white/30 mx-auto mb-3" />
-                    <p className="text-white/80 font-medium text-sm mb-4">No challenges yet</p>
+                    <Target className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-foreground font-semibold text-base mb-4">No challenges yet</p>
                     <button
                         onClick={() => setShowPresetsModal(true)}
                         className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors"
@@ -378,8 +493,8 @@ export default function ChallengeSystem() {
                             <h5 className="text-sm font-medium mb-2">Daily Tasks</h5>
                             <ul className="space-y-1">
                                 {currentChallenge.dailyTasks.map((task, idx) => (
-                                    <li key={idx} className="text-sm text-white/70 flex items-start gap-2">
-                                        <Check className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                                    <li key={idx} className="text-sm text-muted-foreground font-medium flex items-start gap-2">
+                                        <Check className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
                                         {task}
                                     </li>
                                 ))}
@@ -425,14 +540,29 @@ export default function ChallengeSystem() {
                                         key={idx}
                                         className="bg-white/5 rounded-xl p-4 border border-white/10"
                                     >
+                                        {preset.imageUrl && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="relative rounded-lg overflow-hidden aspect-[16/9] mb-3"
+                                            >
+                                                <img
+                                                    src={preset.imageUrl}
+                                                    alt={preset.title}
+                                                    className="w-full h-full object-cover"
+                                                    loading="lazy"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            </motion.div>
+                                        )}
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="text-xl">{categoryIcons[preset.category]}</span>
                                                     <h4 className="font-semibold">{preset.title}</h4>
                                                 </div>
-                                                <p className="text-xs text-white/60 mb-2">{preset.description}</p>
-                                                <div className="flex items-center gap-2 text-xs text-white/90 font-medium">
+                                                <p className="text-sm text-muted-foreground font-medium mb-2">{preset.description}</p>
+                                                <div className="flex items-center gap-2 text-sm text-foreground font-medium">
                                                     <span>{preset.duration} days</span>
                                                     <span>•</span>
                                                     <span className={difficultyColors[preset.difficulty]}>

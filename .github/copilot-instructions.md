@@ -1,21 +1,92 @@
 ```markdown
 # Aura — AI Agent Guide
 
-- Quick commands: `npm install`; `npm run dev`; `npm run build` / `npm start`; `npm run lint`; `npm run test:e2e` (Playwright). DB: `docker-compose up -d` then `npx prisma db push` (optional). Seed: `npm run prisma:seed`.
-- Architecture: Next.js 16 App Router + React 19 + Tailwind v4 (`src/app` pages + API). Client state lives in `src/hooks/useStore.ts` persisted to IndexedDB (`idb-keyval`). Types centralized in `src/types/index.ts`. Optional server sync via Prisma (`prisma/schema.prisma`) and `/api/sync/items`.
-- Conventions: always use `@/` alias; client comps with hooks start with `"use client"`; prefer `lucide-react` icons and `clsx`; keep types only in `src/types/index.ts` and mirror store methods. Avoid adding new relative import chains.
-- Data persistence keys (IndexedDB): `items`, `looks`, `measurements`, `timeline`, `routines`, `shoppingItems`, `shoppingLists`, `inspiration`, `colorSeason`, `chastitySessions`, `corsetSessions`, `orgasmLogs`, `arousalLogs`, `toyCollection`, `intimacyJournal`, `skincareProducts`, `clitMeasurements`, `wigCollection`, `hairStyles`, `sissyGoals`, `sissyLogs`, `compliments`, `packingLists`, `challenges`, `achievements`, `affirmations`, `dailyAffirmation`, `progressPhotos`. Mutations follow pattern: update state, then `set(<key>, next)`. Measurements, timeline, and logs are kept sorted desc by date in the hook.
-- Core types (see `src/types/index.ts`): `Item` (clothing|makeup with `Category`), `Look`, `MeasurementLog` (with goalWaist/goalWHR tracking), `TimelineEntry`, `Routine/RoutineStep`, `ShoppingItem` (retailer/category enums incl. adult), `ShoppingList`, `Inspiration`, `ColorSeason`, `ChastitySession` (with cageModel/ringSize), `CorsetSession` (with waistBefore/waistCorseted/waistAfter/corsetType), `OrgasmLog` (with method/chastityStatus).
-- Store API highlights (`useStore`): add/remove/update for items, looks, routines, shopping items/lists; `toggleWishlist(id)` toggles wishlist flag; `setSeason`; `addInspiration/removeInspiration`; chastity (`lock/unlock/logHygiene`) with cageModel/ringSize fields, corset tracking (`startCorsetSession/endCorsetSession`), orgasm tracking (`addOrgasmLog/removeOrgasmLog`). Respect existing sort/wishlist patterns when adding mutations.
-- AI endpoints:
-  - `/api/gemini` (`src/app/api/gemini/route.ts`): `type` = `text` | `json` | `image`. API key from `x-google-api-key` (dev) or `GOOGLE_API_KEY` (env). `text` builds persona prompt with optional `context` and `weather`; `json` expects raw JSON (no markdown); `image` uses `@/lib/imageGenerator` fallback to placeholder.
-  - `/api/shopping` (`src/app/api/shopping/route.ts`): `type=search` uses 60s in-memory cache; prefers local adapter when `USE_LOCAL_RETAILER_ADAPTER=true` (`RETAILER_ADAPTER_URL`, default http://localhost:8001); otherwise Gemini 1.5 Flash. Accepts `page`/`limit`; filters adult unless `includeAdult` or `x-user-consent: true` (see `src/utils/contentPolicy.ts`). `type=recommendations` returns JSON object; also filters adult categories.
-- Retailer adapter (`api-adapter/adapter.py`): FastAPI bridge to `amazon-mcp`. Start with `uvicorn api-adapter.adapter:app --reload --port 8001`. Enable via env vars above.
-- CSV import + heuristics: `src/utils/amazonParser.ts` maps Amazon CSV rows to `Item` with type/category inference; `test-amazon-parser.ts`/`.mjs` scripts exist. Makeup expiration helpers in `src/utils/expiration.ts` with exact statuses `good|warning|expired` used by UI/tests.
-- Styling/layout: mobile-first, container `max-w-md`; Tailwind semantic tokens (`bg-background`, `text-foreground`, etc.); Framer Motion for transitions; `Navigation.tsx` provides 7-route bottom tab (home, closet, shopping, studio, fitting-room, stylist, vanity).
-- Testing: Playwright specs in `tests/` (navigation, shopping flows); unit tests under `tests/unit/` for parser/expiration/sync. Typecheck manually with `npx tsc --noEmit` if needed. No CI present.
-- DB sync: `/api/sync/items` upserts Prisma `Item` model; if you add server fields update `prisma/schema.prisma` + `@/lib/prisma` usage and advise running `npx prisma db push`.
-- First steps for new features: update `src/types/index.ts` → mirror in `useStore` (persist with matching key) → adjust components/hooks. For AI prompts, send minimal item context `{ name, type, category, color }` to reduce tokens. Keep adult-consent checks (`isAdultCategory`, `x-user-consent`) intact when surfacing adult products.
+## Quick Start
+- **Install**: `npm install` | **Dev**: `npm run dev` | **Build**: `npm run build` then `npm start`
+- **Tests**: `npm run test:e2e` (Playwright) | **Lint**: `npm run lint` | **Typecheck**: `npx tsc --noEmit`
+- **Database** (optional): `docker-compose up -d` → `npx prisma db push` → `npm run prisma:seed`
+- **Python adapter** (for real Amazon search): `uvicorn api-adapter.adapter:app --reload --port 8001`
+
+## Architecture Overview
+- **Stack**: Next.js 16 App Router + React 19 + TypeScript + Tailwind v4 + Framer Motion
+- **State management**: Client-side store in `src/hooks/useStore.ts` persisted to **IndexedDB** via `idb-keyval`
+  - All state mutations: `setState(updated)` → `set(<indexdb-key>, updated)` → component re-renders
+  - Data loads on mount from IndexedDB, sorted desc by date for logs/measurements/timeline
+- **Optional server sync**: Prisma 7 + PostgreSQL for `/api/sync/items` (backup/multi-device)
+- **Type system**: Single source of truth in `src/types/index.ts` — all types defined here, nowhere else
+- **Route structure**: `src/app/*` pages (home, closet, shopping, studio, fitting-room, stylist, vanity, sissy, training, wishlist)
+
+## Auth & Sync
+- **Auth**: NextAuth (credentials) with Prisma adapter; DB sessions (no JWT). Config in `src/lib/authOptions.ts`; route handler at `src/app/api/auth/[...nextauth]/route.ts`.
+- **Register**: POST `/api/register` creates user with bcrypt hash; login at `/login` using credentials provider.
+- **Env**: set `AUTH_SECRET` (or `NEXTAUTH_SECRET`) and `DATABASE_URL` for Prisma/NextAuth.
+- **Data ownership**: `Item.userId` scopes server sync. `/api/sync/items` requires auth and filters by `userId`.
+- **Client sync**: `SessionSync` merges IndexedDB items with server on login, then POSTs merged set; `hydrateItems` in `useStore` persists merged state.
+
+## Critical Conventions (DO NOT BREAK)
+1. **Always use `@/` path alias** for imports — never relative paths like `../../`
+2. **Client components MUST start with `"use client"`** directive when using hooks/state
+3. **Types only in `src/types/index.ts`** — mirror new types in `useStore` mutations
+4. **Icons**: prefer `lucide-react` package; use `clsx` or `cn()` from `@/lib/utils` for conditional classes
+5. **Mobile-first**: containers use `max-w-md`, bottom navigation on mobile, Tailwind semantic tokens (`bg-background`, `text-foreground`)
+
+## Data Persistence Pattern
+**IndexedDB keys** (complete list): `items`, `looks`, `measurements`, `timeline`, `routines`, `shoppingItems`, `shoppingLists`, `inspiration`, `colorSeason`, `chastitySessions`, `corsetSessions`, `orgasmLogs`, `arousalLogs`, `toyCollection`, `intimacyJournal`, `skincareProducts`, `clitMeasurements`, `wigCollection`, `hairStyles`, `sissyGoals`, `sissyLogs`, `compliments`, `packingLists`, `challenges`, `achievements`, `affirmations`, `dailyAffirmation`, `progressPhotos`, `supplements`, `workoutPlans`, `workoutSessions`, `dailyAffirmations`, `makeupTutorials`
+
+**Mutation pattern** (example from `useStore.ts`):
+```typescript
+const addItem = useCallback((item: Item) => {
+  const next = [...items, { ...item, id: uuidv4(), dateAdded: Date.now() }];
+  setItems(next);
+  set("items", next); // Persist to IndexedDB
+}, [items]);
+```
+
+## Core Types Reference
+- **Item**: `{ id, name, type: "clothing"|"makeup", category: Category, color?, image?, price?, wishlist?, brand?, dateAdded, dateOpened?, importMeta? }`
+- **Look**: outfit combos with `items: string[]` (Item IDs)
+- **MeasurementLog**: body tracking with `{ bust, waist, hips, weight, clitLengthMm, goalWaist, goalWHR }` + photo
+- **ChastitySession**: `{ startDate, endDate?, cageModel?, ringSize?, hygieneEvents[] }`
+- **CorsetSession**: `{ waistBefore, waistCorseted, waistAfter, corsetType, durationMinutes }`
+- **OrgasmLog**: `{ date, type, method: "wand"|"anal"|..., chastityStatus: "locked"|"unlocked" }`
+- **ShoppingItem**: retailer/category enums include **adult** categories
+
+## AI Integration
+### `/api/gemini` (Google Generative AI)
+- **`type: "text"`**: builds Aura persona prompt with optional `context` (user inventory) and `weather`
+- **`type: "json"`**: returns structured data (no markdown), use for recommendations
+- **`type: "image"`**: uses `@/lib/imageGenerator`, falls back to placeholder
+- **Auth**: accepts `x-google-api-key` header (dev) or `GOOGLE_API_KEY` env var (prod)
+
+### `/api/shopping` (Product Search)
+- **`type: "search"`**: 60s in-memory cache, supports `page`/`limit` pagination
+  - Prefers local adapter if `USE_LOCAL_RETAILER_ADAPTER=true` (`RETAILER_ADAPTER_URL`)
+  - Falls back to Gemini 1.5 Flash if adapter unavailable
+- **`type: "recommendations"`**: returns JSON object of suggested products
+- **Adult content filtering**: filters adult unless `includeAdult` param OR `x-user-consent: true` header (see `src/utils/contentPolicy.ts`)
+
+## Amazon CSV Import
+- **Parser**: `src/utils/amazonParser.ts` maps CSV columns to `Item` with type/category inference heuristics
+- **Test scripts**: `scripts/test-amazon-parser.ts` and `.mjs` for validation
+- **Expiration tracking**: `src/utils/expiration.ts` returns exact statuses `good|warning|expired` for makeup
+
+## Styling & UI
+- **CSS variables**: defined in `src/app/globals.css` with dark mode via `@media (prefers-color-scheme: dark)`
+- **Navigation**: `src/components/Navigation.tsx` = fixed bottom tab bar (5 main routes: home, closet, shopping, vanity, studio)
+- **Tailwind v4**: uses `@import "tailwindcss"` (no config file), semantic tokens like `bg-primary`, `text-foreground`
+- **Animations**: Framer Motion for page transitions and interactive elements
+
+## Testing
+- **E2E**: Playwright specs in `tests/` (navigation, shopping flows)
+- **Unit**: `tests/unit/` for parser, expiration, sync logic
+- **Manual typecheck**: `npx tsc --noEmit` (no CI configured)
+
+## Adding New Features (Workflow)
+1. **Define types** in `src/types/index.ts` (single source of truth)
+2. **Update `useStore`** with state + mutations, persist with matching IndexedDB key
+3. **Create component** in `src/components/` with `"use client"` if stateful
+4. **Keep adult consent checks** (`isAdultCategory`, `x-user-consent` header) when surfacing products
+5. **Minimize AI token usage**: send only `{ name, type, category, color }` for item context, not full objects
 ```
 
 

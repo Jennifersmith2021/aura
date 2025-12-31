@@ -48,8 +48,109 @@ export default function SissyTraining() {
     const [activeTab, setActiveTab] = useState<"goals" | "log">("goals");
     const [showGoalModal, setShowGoalModal] = useState(false);
     const [showLogModal, setShowLogModal] = useState(false);
+    const [showPresetModal, setShowPresetModal] = useState(false);
     const [editingGoal, setEditingGoal] = useState<string | null>(null);
     const [filterCategory, setFilterCategory] = useState<string>("all");
+
+    // Preset goals
+    const presetGoals = [
+        {
+            title: "Master Makeup Application",
+            category: "appearance" as const,
+            description: "Learn to apply full makeup flawlessly",
+            priority: "high" as const,
+            progress: 0,
+            milestones: ["Learn foundation basics", "Master eye makeup", "Perfect lip application", "Blend like a pro"].join("\n"),
+        },
+        {
+            title: "Develop Feminine Voice",
+            category: "skills" as const,
+            description: "Practice feminine voice and speech patterns",
+            priority: "high" as const,
+            progress: 0,
+            milestones: ["Raise pitch", "Soften tone", "Practice inflection", "Build confidence"].join("\n"),
+        },
+        {
+            title: "Build Complete Wardrobe",
+            category: "appearance" as const,
+            description: "Acquire essential feminine clothing items",
+            priority: "medium" as const,
+            progress: 0,
+            milestones: ["Get first dress", "Buy lingerie sets", "Acquire heels", "Complete accessories"].join("\n"),
+        },
+        {
+            title: "Perfect Feminine Walk",
+            category: "behavior" as const,
+            description: "Learn to walk gracefully in heels",
+            priority: "medium" as const,
+            progress: 0,
+            milestones: ["Practice balance", "Hip sway", "Posture correction", "Confidence in public"].join("\n"),
+        },
+        {
+            title: "Embrace Sissy Mindset",
+            category: "mindset" as const,
+            description: "Accept and celebrate your sissy nature",
+            priority: "high" as const,
+            progress: 0,
+            milestones: ["Daily affirmations", "Self-acceptance", "Confidence building", "Embrace femininity"].join("\n"),
+        },
+        {
+            title: "Achieve Hourglass Figure",
+            category: "fitness" as const,
+            description: "Develop feminine body shape through training",
+            priority: "medium" as const,
+            progress: 0,
+            milestones: ["Start waist training", "Hip exercises", "Weight management", "Track measurements"].join("\n"),
+        },
+        {
+            title: "Serve with Devotion",
+            category: "intimate" as const,
+            description: "Learn to serve and please properly",
+            priority: "medium" as const,
+            progress: 0,
+            milestones: ["Study techniques", "Practice positions", "Develop eagerness", "Perfect service"].join("\n"),
+        },
+        {
+            title: "Master Chastity Discipline",
+            category: "intimate" as const,
+            description: "Maintain long-term chastity with devotion",
+            priority: "high" as const,
+            progress: 0,
+            milestones: ["Week locked", "Month locked", "Handle denial", "Find pleasure in chastity"].join("\n"),
+        },
+        {
+            title: "Plug Training Progress",
+            category: "intimate" as const,
+            description: "Progress through butt plug sizes comfortably",
+            priority: "medium" as const,
+            progress: 0,
+            milestones: ["Small plug comfort", "Wear for hours", "Medium size", "Large size mastery"].join("\n"),
+        },
+        {
+            title: "Skincare Routine Excellence",
+            category: "appearance" as const,
+            description: "Maintain flawless feminine skin",
+            priority: "low" as const,
+            progress: 0,
+            milestones: ["Morning routine", "Evening routine", "Weekly treatments", "Perfect complexion"].join("\n"),
+        },
+        {
+            title: "Graceful Mannerisms",
+            category: "behavior" as const,
+            description: "Adopt feminine gestures and body language",
+            priority: "medium" as const,
+            progress: 0,
+            milestones: ["Hand movements", "Sitting gracefully", "Eye contact", "Soft expressions"].join("\n"),
+        },
+        {
+            title: "Hair & Wig Mastery",
+            category: "appearance" as const,
+            description: "Style and maintain beautiful hair/wigs",
+            priority: "low" as const,
+            progress: 0,
+            milestones: ["Choose right wig", "Styling techniques", "Natural look", "Confidence wearing"].join("\n"),
+        },
+    ];
 
     // Goal form state
     const [title, setTitle] = useState("");
@@ -209,20 +310,20 @@ export default function SissyTraining() {
             {/* Stats */}
             <div className="grid grid-cols-4 gap-2">
                 <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-lg p-3 border border-pink-500/20">
-                    <div className="text-2xl font-bold text-pink-400">{totalGoals}</div>
-                    <div className="text-xs text-white/90 font-medium">Goals</div>
+                    <div className="text-2xl font-bold text-pink-500">{totalGoals}</div>
+                    <div className="text-xs text-foreground font-medium">Goals</div>
                 </div>
                 <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg p-3 border border-green-500/20">
-                    <div className="text-2xl font-bold text-green-400">{completedGoals}</div>
-                    <div className="text-xs text-white/90 font-medium">Done</div>
+                    <div className="text-2xl font-bold text-green-500">{completedGoals}</div>
+                    <div className="text-xs text-foreground font-medium">Done</div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg p-3 border border-blue-500/20">
-                    <div className="text-2xl font-bold text-blue-400">{avgProgress}%</div>
-                    <div className="text-xs text-white/90 font-medium">Progress</div>
+                    <div className="text-2xl font-bold text-blue-500">{avgProgress}%</div>
+                    <div className="text-xs text-foreground font-medium">Progress</div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg p-3 border border-purple-500/20">
-                    <div className="text-2xl font-bold text-purple-400">{thisWeekLogs}</div>
-                    <div className="text-xs text-white/90 font-medium">This Week</div>
+                    <div className="text-2xl font-bold text-purple-500">{thisWeekLogs}</div>
+                    <div className="text-xs text-foreground font-medium">This Week</div>
                 </div>
             </div>
 
@@ -234,7 +335,7 @@ export default function SissyTraining() {
                         "flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                         activeTab === "goals"
                             ? "bg-pink-500 text-white"
-                            : "bg-white/5 text-white/60 hover:bg-white/10"
+                            : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
                 >
                     <Target className="w-4 h-4 inline mr-1" />
@@ -246,7 +347,7 @@ export default function SissyTraining() {
                         "flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                         activeTab === "log"
                             ? "bg-pink-500 text-white"
-                            : "bg-white/5 text-white/60 hover:bg-white/10"
+                            : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
                 >
                     <BookOpen className="w-4 h-4 inline mr-1" />
@@ -257,17 +358,26 @@ export default function SissyTraining() {
             {/* Goals Tab */}
             {activeTab === "goals" && (
                 <div className="space-y-4">
-                    {/* Add Goal Button */}
-                    <button
-                        onClick={() => {
-                            resetGoalForm();
-                            setShowGoalModal(true);
-                        }}
-                        className="w-full px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Plus className="w-4 h-4" />
-                        New Goal
-                    </button>
+                    {/* Add Goal Buttons */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                resetGoalForm();
+                                setShowGoalModal(true);
+                            }}
+                            className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            New Goal
+                        </button>
+                        <button
+                            onClick={() => setShowPresetModal(true)}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <Sparkles className="w-4 h-4" />
+                            Presets
+                        </button>
+                    </div>
 
                     {/* Category Filter */}
                     <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
@@ -347,50 +457,44 @@ export default function SissyTraining() {
                                                         goal.priority === "high" && "bg-red-500/20 text-red-300",
                                                         goal.priority === "medium" && "bg-yellow-500/20 text-yellow-300",
                                                         goal.priority === "low" && "bg-gray-500/20 text-gray-300"
-                                                    )}
-                                                >
-                                                    {goal.priority}
-                                                </span>
-                                                {goal.targetDate && (
-                                                    <span className="px-2 py-0.5 rounded text-xs bg-white/10 text-white/90 font-medium flex items-center gap-1">
-                                                        <Calendar className="w-3 h-3" />
-                                                        {new Date(goal.targetDate).toLocaleDateString()}
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Progress Bar */}
-                                            {!goal.completed && (
-                                                <div className="mb-2">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <span className="text-xs text-white/90 font-medium">Progress</span>
-                                                        <span className="text-xs text-white/90 font-medium">{goal.progress}%</span>
-                                                    </div>
-                                                    <div className="w-full bg-white/10 rounded-full h-2">
-                                                        <div
-                                                            className="bg-gradient-to-r from-pink-500 to-purple-500 h-2 rounded-full transition-all"
-                                                            style={{ width: `${goal.progress}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
                                             )}
-
-                                            {/* Milestones */}
-                                            {goal.milestones && goal.milestones.length > 0 && (
-                                                <div className="mb-2">
-                                                    <div className="text-xs text-white/90 font-medium mb-1">Milestones:</div>
-                                                    <ul className="space-y-1">
-                                                        {goal.milestones.map((milestone: string, i: number) => (
-                                                            <li key={i} className="text-xs text-white/90 font-medium flex items-start gap-1">
-                                                                <span className="text-pink-400">•</span>
-                                                                {milestone}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-
-                                            {/* Actions */}
+                                        >
+                                            {goal.priority}
+                                        </span>
+                                        {goal.targetDate && (
+                                            <span className="px-2 py-0.5 rounded text-xs bg-secondary text-foreground font-medium flex items-center gap-1">
+                                                <Calendar className="w-3 h-3" />
+                                                {new Date(goal.targetDate).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>                            {/* Progress Bar */}
+                            {!goal.completed && (
+                                <div className="mb-2">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-xs text-foreground font-medium">Progress</span>
+                                        <span className="text-xs text-foreground font-medium">{goal.progress}%</span>
+                                    </div>
+                                    <div className="w-full bg-white/10 rounded-full h-2">
+                                        <div
+                                            className="bg-gradient-to-r from-pink-500 to-purple-500 h-2 rounded-full transition-all"
+                                            style={{ width: `${goal.progress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            )}                            {/* Milestones */}
+                            {goal.milestones && goal.milestones.length > 0 && (
+                                <div className="mb-2">
+                                    <div className="text-xs text-foreground font-medium mb-1">Milestones:</div>
+                                    <ul className="space-y-1">
+                                        {goal.milestones.map((milestone: string, i: number) => (
+                                            <li key={i} className="text-xs text-foreground font-medium flex items-start gap-1">
+                                                <span className="text-pink-500">•</span>
+                                                {milestone}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}                                            {/* Actions */}
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleEditGoal(goal.id)}
@@ -863,6 +967,90 @@ export default function SissyTraining() {
                                         Log
                                     </button>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Preset Goals Modal */}
+            <AnimatePresence>
+                {showPresetModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={() => setShowPresetModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gradient-to-br from-slate-900 to-purple-950 border border-purple-500/20 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl"
+                        >
+                            <div className="p-6 border-b border-white/10">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold flex items-center gap-2">
+                                        <Sparkles className="w-6 h-6 text-purple-400" />
+                                        Preset Sissy Goals
+                                    </h3>
+                                    <button
+                                        onClick={() => setShowPresetModal(false)}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-2 font-medium">
+                                    Click to add preset goals to your training plan
+                                </p>
+                            </div>
+                            <div className="p-6 space-y-3 overflow-y-auto max-h-[60vh]">
+                                {presetGoals.map((preset, idx) => (
+                                    <div
+                                        key={idx}
+                                        onClick={() => {
+                                            addSissyGoal({
+                                                id: Math.random().toString(36).substr(2, 9),
+                                                title: preset.title,
+                                                category: preset.category,
+                                                description: preset.description,
+                                                completed: false,
+                                                priority: preset.priority,
+                                                progress: preset.progress,
+                                                milestones: preset.milestones.split("\n"),
+                                            });
+                                            setShowPresetModal(false);
+                                        }}
+                                        className="bg-white/5 hover:bg-white/10 rounded-xl p-4 cursor-pointer transition-all border border-white/10 hover:border-purple-500/50 group"
+                                    >
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-lg">{categoryIcons[preset.category]}</span>
+                                                    <h4 className="font-bold text-base text-foreground">{preset.title}</h4>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground font-medium">{preset.description}</p>
+                                            </div>
+                                            <span
+                                                className={clsx(
+                                                    "px-2 py-1 rounded-full text-xs font-medium",
+                                                    preset.priority === "high" && "bg-red-500/20 text-red-300 border border-red-500/30",
+                                                    preset.priority === "medium" && "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
+                                                    preset.priority === "low" && "bg-green-500/20 text-green-300 border border-green-500/30"
+                                                )}
+                                            >
+                                                {preset.priority}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium mt-2">
+                                            <Target className="w-3 h-3" />
+                                            <span>{preset.milestones.split("\n").length} milestones</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </motion.div>
                     </motion.div>

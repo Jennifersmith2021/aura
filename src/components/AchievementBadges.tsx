@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/preserve-manual-memoization */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useStore } from "@/hooks/useStore";
@@ -11,7 +12,7 @@ interface Achievement {
     id: string;
     title: string;
     description: string;
-    category: "closet" | "looks" | "measurements" | "training" | "chastity" | "social" | "milestone";
+    category: "closet" | "looks" | "measurements" | "training" | "chastity" | "social" | "milestone" | "sissy";
     icon: string;
     unlocked: boolean;
     unlockedDate?: number;
@@ -42,10 +43,11 @@ const categoryIcons = {
     chastity: "🔒",
     social: "👥",
     milestone: "🏆",
+    sissy: "💕",
 };
 
 export default function AchievementBadges() {
-    const { items, looks, measurements, sissyGoals, chastitySessions } = useStore();
+    const { items, looks, measurements, sissyGoals, chastitySessions, sissyLogs, toyCollection, orgasmLogs } = useStore();
     const [achievements, setAchievements] = useState<Achievement[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [showUnlockedModal, setShowUnlockedModal] = useState<Achievement | null>(null);
@@ -87,6 +89,37 @@ export default function AchievementBadges() {
         { id: "week-streak", title: "Consistent", description: "Use app for 7 days", category: "milestone", icon: "🔥", requirement: 7, rarity: "common" },
         { id: "month-streak", title: "Committed", description: "Use app for 30 days", category: "milestone", icon: "💪", requirement: 30, rarity: "rare" },
         { id: "year-anniversary", title: "One Year Journey", description: "Use app for 365 days", category: "milestone", icon: "🎊", requirement: 365, rarity: "legendary" },
+        
+        // Sissy achievements
+        { id: "first-sissy-goal", title: "Beginning Sissy", description: "Create your first sissy training goal", category: "sissy", icon: "💕", requirement: 1, rarity: "common" },
+        { id: "sissy-goals-5", title: "Devoted Sissy", description: "Create 5 sissy training goals", category: "sissy", icon: "💖", requirement: 5, rarity: "rare" },
+        { id: "sissy-complete-1", title: "Sissy Achievement", description: "Complete your first sissy goal", category: "sissy", icon: "🎀", requirement: 1, rarity: "rare" },
+        { id: "sissy-complete-10", title: "Sissy Excellence", description: "Complete 10 sissy goals", category: "sissy", icon: "👸", requirement: 10, rarity: "epic" },
+        { id: "sissy-complete-25", title: "Master Sissy", description: "Complete 25 sissy goals", category: "sissy", icon: "👑", requirement: 25, rarity: "legendary" },
+        { id: "all-categories", title: "Well-Rounded Sissy", description: "Complete goals in all 6 categories", category: "sissy", icon: "🌈", requirement: 6, rarity: "epic" },
+        { id: "appearance-mastery", title: "Appearance Perfection", description: "Complete 5 appearance goals", category: "sissy", icon: "💄", requirement: 5, rarity: "rare" },
+        { id: "behavior-mastery", title: "Perfect Behavior", description: "Complete 5 behavior goals", category: "sissy", icon: "🎭", requirement: 5, rarity: "rare" },
+        { id: "skills-mastery", title: "Skilled Sissy", description: "Complete 5 skills goals", category: "sissy", icon: "🎨", requirement: 5, rarity: "rare" },
+        { id: "mindset-mastery", title: "Sissy Mindset", description: "Complete 5 mindset goals", category: "sissy", icon: "🧠", requirement: 5, rarity: "rare" },
+        { id: "fitness-mastery", title: "Sissy Fitness", description: "Complete 5 fitness goals", category: "sissy", icon: "💪", requirement: 5, rarity: "rare" },
+        { id: "intimate-mastery", title: "Intimate Excellence", description: "Complete 5 intimate goals", category: "sissy", icon: "💋", requirement: 5, rarity: "rare" },
+        { id: "high-priority-10", title: "Priority Focused", description: "Complete 10 high-priority sissy goals", category: "sissy", icon: "⭐", requirement: 10, rarity: "epic" },
+        { id: "weekly-training", title: "Weekly Dedication", description: "Log sissy training 7 days in a row", category: "sissy", icon: "📅", requirement: 7, rarity: "common" },
+        { id: "monthly-training", title: "Monthly Commitment", description: "Log sissy training 30 days in a row", category: "sissy", icon: "🗓️", requirement: 30, rarity: "rare" },
+        { id: "training-100", title: "Century of Training", description: "Log 100 sissy training sessions", category: "sissy", icon: "💯", requirement: 100, rarity: "epic" },
+        
+        // Butt plug achievements
+        { id: "first-plug", title: "Plugged Beginner", description: "Add your first butt plug to collection", category: "sissy", icon: "🍑", requirement: 1, rarity: "common" },
+        { id: "plug-collection-3", title: "Plug Enthusiast", description: "Own 3 butt plugs", category: "sissy", icon: "💎", requirement: 3, rarity: "rare" },
+        { id: "plug-collection-5", title: "Plug Collector", description: "Own 5 butt plugs", category: "sissy", icon: "💖", requirement: 5, rarity: "epic" },
+        { id: "plug-variety", title: "Size Progression", description: "Own plugs in 3 different sizes", category: "sissy", icon: "📈", requirement: 3, rarity: "rare" },
+        
+        // Orgasm denial achievements
+        { id: "denial-7", title: "Week Denied", description: "Go 7 days without cumming", category: "sissy", icon: "🚫", requirement: 7, rarity: "common" },
+        { id: "denial-14", title: "Two Week Denial", description: "Go 14 days without cumming", category: "sissy", icon: "⏳", requirement: 14, rarity: "rare" },
+        { id: "denial-30", title: "Month Denied", description: "Go 30 days without cumming", category: "sissy", icon: "🔐", requirement: 30, rarity: "epic" },
+        { id: "denial-60", title: "Ultimate Denial", description: "Go 60 days without cumming", category: "sissy", icon: "🏆", requirement: 60, rarity: "legendary" },
+        { id: "denial-90", title: "Denial Master", description: "Go 90 days without cumming", category: "sissy", icon: "👑", requirement: 90, rarity: "legendary" },
     ];
 
     // Calculate progress for each achievement
@@ -156,6 +189,111 @@ export default function AchievementBadges() {
                 }, 0);
                 current = longestSession;
                 break;
+
+            // Sissy achievements
+            case "first-sissy-goal":
+            case "sissy-goals-5":
+                current = sissyGoals.length;
+                break;
+            case "sissy-complete-1":
+            case "sissy-complete-10":
+            case "sissy-complete-25":
+                current = sissyGoals.filter((g) => g.completed).length;
+                break;
+            case "all-categories":
+                const categories = ['appearance', 'behavior', 'skills', 'mindset', 'fitness', 'intimate'];
+                const completedCategories = new Set(
+                    sissyGoals.filter((g) => g.completed).map((g) => g.category)
+                );
+                current = completedCategories.size;
+                break;
+            case "appearance-mastery":
+                current = sissyGoals.filter((g) => g.completed && g.category === 'appearance').length;
+                break;
+            case "behavior-mastery":
+                current = sissyGoals.filter((g) => g.completed && g.category === 'behavior').length;
+                break;
+            case "skills-mastery":
+                current = sissyGoals.filter((g) => g.completed && g.category === 'skills').length;
+                break;
+            case "mindset-mastery":
+                current = sissyGoals.filter((g) => g.completed && g.category === 'mindset').length;
+                break;
+            case "fitness-mastery":
+                current = sissyGoals.filter((g) => g.completed && g.category === 'fitness').length;
+                break;
+            case "intimate-mastery":
+                current = sissyGoals.filter((g) => g.completed && g.category === 'intimate').length;
+                break;
+            case "high-priority-10":
+                current = sissyGoals.filter((g) => g.completed && g.priority === 'high').length;
+                break;
+            case "weekly-training":
+            case "monthly-training":
+                const sortedLogs = [...sissyLogs].sort((a, b) => b.date - a.date);
+                let streak = 0;
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                for (const log of sortedLogs) {
+                    const logDate = new Date(log.date);
+                    logDate.setHours(0, 0, 0, 0);
+                    const daysDiff = Math.floor((currentDate.getTime() - logDate.getTime()) / (24 * 60 * 60 * 1000));
+                    if (daysDiff === streak) {
+                        streak++;
+                    } else {
+                        break;
+                    }
+                }
+                current = streak;
+                break;
+            case "training-100":
+                current = sissyLogs.length;
+                break;
+
+            // Butt plug achievements
+            case "first-plug":
+            case "plug-collection-3":
+            case "plug-collection-5":
+                const plugs = toyCollection.filter(toy => 
+                    toy.type.toLowerCase().includes('plug') || 
+                    toy.type.toLowerCase().includes('anal')
+                );
+                current = plugs.length;
+                break;
+            case "plug-variety":
+                const plugTypes = new Set(
+                    toyCollection
+                        .filter(toy => toy.type.toLowerCase().includes('plug'))
+                        .map(toy => {
+                            const name = toy.name.toLowerCase();
+                            if (name.includes('small') || name.includes('beginner')) return 'small';
+                            if (name.includes('large') || name.includes('xl')) return 'large';
+                            if (name.includes('medium')) return 'medium';
+                            // Try to infer from type
+                            if (toy.type.toLowerCase().includes('small')) return 'small';
+                            if (toy.type.toLowerCase().includes('large')) return 'large';
+                            return 'medium';
+                        })
+                );
+                current = plugTypes.size;
+                break;
+
+            // Orgasm denial achievements
+            case "denial-7":
+            case "denial-14":
+            case "denial-30":
+            case "denial-60":
+            case "denial-90":
+                if (orgasmLogs.length === 0) {
+                    // No orgasms logged yet, can't calculate denial
+                    current = 0;
+                } else {
+                    const sortedOrgasms = [...orgasmLogs].sort((a, b) => b.date - a.date);
+                    const lastOrgasm = sortedOrgasms[0];
+                    const daysSinceOrgasm = Math.floor((Date.now() - lastOrgasm.date) / (24 * 60 * 60 * 1000));
+                    current = daysSinceOrgasm;
+                }
+                break;
         }
 
         const progress = Math.min(100, Math.round((current / achievement.requirement) * 100));
@@ -216,22 +354,22 @@ export default function AchievementBadges() {
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-lg font-semibold">Achievements</h3>
+                <Trophy className="w-6 h-6 text-yellow-400" />
+                <h3 className="text-xl font-bold">Achievements</h3>
             </div>
 
             {/* Stats */}
             <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl p-4 border border-yellow-500/20">
                 <div className="flex items-center justify-between mb-3">
                     <div>
-                        <div className="text-2xl font-bold">
+                        <div className="text-3xl font-bold">
                             {stats.unlockedCount}/{stats.totalCount}
                         </div>
-                        <div className="text-xs text-white/60">Achievements Unlocked</div>
+                        <div className="text-sm font-medium text-muted-foreground">Achievements Unlocked</div>
                     </div>
                     <div className="text-right">
-                        <div className="text-2xl font-bold">{stats.percentage}%</div>
-                        <div className="text-xs text-white/60">Complete</div>
+                        <div className="text-3xl font-bold">{stats.percentage}%</div>
+                        <div className="text-sm font-medium text-muted-foreground">Complete</div>
                     </div>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2 mb-3">
@@ -240,22 +378,22 @@ export default function AchievementBadges() {
                         style={{ width: `${stats.percentage}%` }}
                     />
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-xs">
+                <div className="grid grid-cols-4 gap-2 text-sm">
                     <div className="text-center">
-                        <div className="font-bold text-gray-400">{stats.byRarity.common}</div>
-                        <div className="text-white/90 font-medium">Common</div>
+                        <div className="font-bold text-lg text-gray-400">{stats.byRarity.common}</div>
+                        <div className="text-foreground font-semibold">Common</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-bold text-blue-400">{stats.byRarity.rare}</div>
-                        <div className="text-white/90 font-medium">Rare</div>
+                        <div className="font-bold text-lg text-blue-400">{stats.byRarity.rare}</div>
+                        <div className="text-foreground font-semibold">Rare</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-bold text-purple-400">{stats.byRarity.epic}</div>
-                        <div className="text-white/90 font-medium">Epic</div>
+                        <div className="font-bold text-lg text-purple-400">{stats.byRarity.epic}</div>
+                        <div className="text-foreground font-semibold">Epic</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-bold text-yellow-400">{stats.byRarity.legendary}</div>
-                        <div className="text-white/90 font-medium">Legendary</div>
+                        <div className="font-bold text-lg text-yellow-400">{stats.byRarity.legendary}</div>
+                        <div className="text-foreground font-semibold">Legendary</div>
                     </div>
                 </div>
             </div>
@@ -309,17 +447,17 @@ export default function AchievementBadges() {
                         </div>
 
                         {/* Title & Description */}
-                        <h4 className="font-bold text-sm mb-1 text-white drop-shadow-sm">
+                        <h4 className="font-bold text-base mb-1 text-foreground">
                             {achievement.title}
                         </h4>
-                        <p className="text-xs mb-2 leading-relaxed text-white/95 font-medium">
+                        <p className="text-sm mb-2 leading-relaxed text-muted-foreground font-medium">
                             {achievement.description}
                         </p>
 
                         {/* Progress */}
                         {!achievement.unlocked && (
                             <div className="mt-2">
-                                <div className="flex items-center justify-between text-xs text-white/80 font-medium mb-1">
+                                <div className="flex items-center justify-between text-sm text-foreground font-semibold mb-1">
                                     <span>Progress</span>
                                     <span>{achievement.progress}%</span>
                                 </div>
@@ -337,9 +475,9 @@ export default function AchievementBadges() {
 
                         {/* Unlocked Date */}
                         {achievement.unlocked && achievement.unlockedDate && (
-                            <div className="flex items-center gap-1 text-xs text-white/90 font-medium mt-2">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(achievement.unlockedDate).toLocaleDateString()}
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground font-medium mt-2">
+                                <Calendar className="w-4 h-4" />
+                                <span>Unlocked {new Date(achievement.unlockedDate).toLocaleDateString()}</span>
                             </div>
                         )}
 

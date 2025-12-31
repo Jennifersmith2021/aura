@@ -72,8 +72,18 @@ Return ONLY a JSON object with this exact structure:
 
             const result = await model.generateContent(finalPrompt);
             const response = await result.response;
-            const text = response.text();
-            return NextResponse.json(JSON.parse(text));
+            let text = response.text();
+            
+            // Remove markdown code blocks if present
+            text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            
+            try {
+                const parsed = JSON.parse(text);
+                return NextResponse.json(parsed);
+            } catch (parseError) {
+                console.error("JSON parse error:", parseError, "Raw text:", text);
+                return NextResponse.json({ error: "Failed to parse AI response as JSON", rawText: text }, { status: 500 });
+            }
         } else if (type === "image") {
             // Attempt server-side image generation via configured provider; otherwise fallback
             try {

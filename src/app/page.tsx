@@ -3,24 +3,36 @@
 import { useStore } from "@/hooks/useStore";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemModal } from "@/components/AddItemModal";
+import { DailyChallengeWidget } from "@/components/DailyChallengeWidget";
 import { useState } from "react";
-import { Plus, Shirt, Sparkles } from "lucide-react";
+import { LogIn, LogOut, Plus, Shirt, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PageTransition } from "@/components/PageTransition";
 import { ShoppingWidget } from "@/components/ShoppingWidget";
 import { Timeline } from "@/components/Timeline";
 import { getDailyQuote } from "@/utils/quotes";
+import DailySchedule from "@/components/DailySchedule";
+import DailyProgressSummary from "@/components/DailyProgressSummary";
+import AffirmationOfTheDay from "@/components/AffirmationOfTheDay";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Dashboard() {
   const { items, loading, addItem } = useStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [quote] = useState(() => getDailyQuote());
+  const { data: session, status } = useSession();
 
   const clothingCount = items.filter((i) => i.type === "clothing").length;
   const makeupCount = items.filter((i) => i.type === "makeup").length;
   const recentItems = [...items].sort((a, b) => b.dateAdded - a.dateAdded).slice(0, 4);
 
   if (loading) return <div className="p-8 text-center">Loading Aura...</div>;
+
+  const userInitials = (session?.user?.name || session?.user?.email || "Guest")
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join("");
 
   return (
     <PageTransition className="pb-24 pt-8 px-6 space-y-8">
@@ -32,12 +44,40 @@ export default function Dashboard() {
           </h1>
           <p className="text-muted-foreground text-sm mt-1 italic">&quot;{quote}&quot;</p>
         </div>
-        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-400 to-purple-500 p-[2px]">
-          <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center">
-            <span className="font-bold text-xs">JD</span>
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-semibold">{session?.user?.name || session?.user?.email || "Guest"}</p>
+            <p className="text-xs text-muted-foreground">
+              {status === "authenticated" ? "Synced" : "Offline mode"}
+            </p>
           </div>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-400 to-purple-500 p-[2px]">
+            <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center">
+              <span className="font-bold text-xs">{userInitials}</span>
+            </div>
+          </div>
+          {status === "authenticated" ? (
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex items-center gap-2 text-sm font-medium text-primary"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          ) : (
+            <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-primary">
+              <LogIn className="w-4 h-4" />
+              Sign in
+            </Link>
+          )}
         </div>
       </div>
+
+      {/* Affirmation of the Day */}
+      <AffirmationOfTheDay />
+
+      {/* Daily Challenges */}
+      <DailyChallengeWidget />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
@@ -57,6 +97,18 @@ export default function Dashboard() {
           <p className="text-2xl font-bold">{makeupCount}</p>
           <p className="text-xs text-muted-foreground">Products</p>
         </div>
+      </div>
+
+      {/* Daily Tasks */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Daily Tasks</h2>
+          <Link href="/sissy" className="text-sm text-primary font-medium">
+            Open Full Schedule
+          </Link>
+        </div>
+        <DailySchedule />
+        <DailyProgressSummary />
       </div>
 
       {/* Quick Actions */}

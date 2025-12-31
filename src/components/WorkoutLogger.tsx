@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/purity */
 
 import { useStore } from "@/hooks/useStore";
 import { useState } from "react";
