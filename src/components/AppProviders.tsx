@@ -5,7 +5,11 @@ import { SessionSync } from "@/components/SessionSync";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider
+      // Prevent errors when auth API isn't available
+      refetchInterval={0}
+      refetchOnWindowFocus={false}
+    >
       <SessionSync />
       {children}
     </SessionProvider>

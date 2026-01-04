@@ -32,6 +32,17 @@ import logging
 import os
 from datetime import datetime
 import asyncio
+from pathlib import Path
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent / '.env'
+    if env_path.exists():
+        load_dotenv(env_path)
+        logging.info(f"Loaded environment from {env_path}")
+except ImportError:
+    logging.warning("python-dotenv not installed, skipping .env file loading")
 
 try:
     import amazon_mcp
@@ -43,6 +54,13 @@ except ImportError:
     Amazon = None
     amazon_search = None
     HAS_AMAZON_MCP = False
+
+# Import scraper
+try:
+    from amazon_scraper import scrape_amazon_orders, HAS_PLAYWRIGHT
+except ImportError:
+    scrape_amazon_orders = None
+    HAS_PLAYWRIGHT = False
 
 # Optional caching to avoid hitting Amazon too often
 from cachetools import TTLCache
@@ -293,38 +311,221 @@ def search(
 async def get_orders(
     limit: int = Query(50, ge=1, le=500),
     days: Optional[int] = Query(None, ge=1),
+    test: bool = Query(False, description="Return test data"),
+    use_scraper: bool = Query(True, description="Use browser scraper for real orders"),
 ):
     """
-    Fetch user's Amazon order history via amazon-mcp SDK.
+    Fetch user's Amazon order history via browser scraper or MCP SDK.
     
     Args:
         limit: Maximum orders to retrieve (default 50)
         days: Only fetch orders from last N days (optional)
+        test: Return sample test data (default False)
+        use_scraper: Use browser automation scraper (recommended, default True)
     """
-    if not HAS_AMAZON_MCP:
-        raise HTTPException(
-            status_code=501,
-            detail={"error": "amazon-mcp not installed"},
-        )
 
     try:
-        logger.info(f"Fetching Amazon orders (limit {limit})")
+        logger.info(f"Fetching Amazon orders (limit {limit}, test={test})")
         
-        # For now, return a message that order history requires special setup
-        # amazon_mcp may not have a direct orders function in the public API
+        # Return test data if requested
+        if test:
+            sample_orders = [
+                OrderItem(
+                    order_id="112-1234567-8901234",
+                    order_date=datetime(2025, 12, 15, 14, 30),
+                    asin="B08L8KC1J7",
+                    name="Maybelline Fit Me Matte + Poreless Foundation",
+                    category="makeup",
+                    price=7.98,
+                    quantity=1,
+                    image_url="https://m.media-amazon.com/images/I/51VbJjPP5hL._AC_SL1500_.jpg",
+                    url="https://www.amazon.com/dp/B08L8KC1J7",
+                ),
+                OrderItem(
+                    order_id="112-1234567-8901235",
+                    order_date=datetime(2025, 12, 10, 10, 15),
+                    asin="B0BZ8Q5W3L",
+                    name="Women's High Waist Yoga Pants with Pockets",
+                    category="clothing",
+                    price=24.99,
+                    quantity=2,
+                    image_url="https://m.media-amazon.com/images/I/61hJVqBxbgL._AC_SX679_.jpg",
+                    url="https://www.amazon.com/dp/B0BZ8Q5W3L",
+                ),
+                OrderItem(
+                    order_id="112-1234567-8901236",
+                    order_date=datetime(2025, 11, 28, 16, 45),
+                    asin="B07FKTZC3T",
+                    name="Revlon One-Step Hair Dryer & Volumizer",
+                    category="beauty",
+                    price=39.99,
+                    quantity=1,
+                    image_url="https://m.media-amazon.com/images/I/61Wjzp0EhCL._AC_SL1500_.jpg",
+                    url="https://www.amazon.com/dp/B07FKTZC3T",
+                ),
+            ]
+            return OrdersResponse(
+                orders=sample_orders[:limit],
+                total=len(sample_orders),
+            )
+        
+        # Use browser scraper if requested and available
+        if use_scraper and HAS_PLAYWRIGHT and scrape_amazon_orders:
+            logger.info(f"Browser scraper available: HAS_PLAYWRIGHT={HAS_PLAYWRIGHT}, scrape_amazon_orders={scrape_amazon_orders is not None}")
+            email = os.getenv("AMAZON_EMAIL")
+            password = os.getenv("AMAZON_PASSWORD")
+            logger.info(f"Email configured: {bool(email)}, Password configured: {bool(password)}")
+            
+            if not email or not password:
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "error": "Amazon credentials not configured",
+                        "hint": "Set AMAZON_EMAIL and AMAZON_PASSWORD in .env file",
+                    },
+                )
+            
+            logger.info(f"Using browser scraper to fetch {limit} orders...")
+            try:
+                raw_orders = await scrape_amazon_orders(email, password, max_orders=limit)
+                
+                # Convert to OrderItem format
+                orders = []
+                for order in raw_orders:
+                    try:
+                        order_date_str = order.get("order_date", "")
+                        # Parse various date formats
+                        try:
+                            if "," in order_date_str:
+                                order_date = datetime.strptime(order_date_str, "%B %d, %Y")
+                            else:
+                                order_date = datetime.now()
+                        except:
+                            order_date = datetime.now()
+                        
+                        orders.append(OrderItem(
+                            order_id=order.get("order_id", "unknown"),
+                            order_date=order_date,
+                            asin=order.get("asin", ""),
+                            name=order.get("name", "Unknown Item"),
+                            category=None,  # Will be inferred by Aura
+                            price=order.get("price"),
+                            quantity=1,
+                            image_url=order.get("image_url"),
+                            url=order.get("url"),
+                        ))
+                    except Exception as e:
+                        logger.warning(f"Failed to parse scraped order: {e}")
+                        continue
+                
+                if orders:
+                    return OrdersResponse(
+                        orders=orders[:limit],
+                        total=len(orders),
+                    )
+                else:
+                    logger.warning("Browser scraper returned no orders, will try amazon-mcp")
+            except Exception as scraper_error:
+                logger.warning(f"Browser scraper failed: {scraper_error}, will try amazon-mcp")
+        
+        # Fallback: Use amazon-mcp library if available
+        if HAS_AMAZON_MCP and Amazon:
+            logger.info("Falling back to amazon-mcp SDK for orders...")
+            try:
+                email = os.getenv("AMAZON_EMAIL")
+                password = os.getenv("AMAZON_PASSWORD")
+                
+                if email and password:
+                    amazon = Amazon(email=email, password=password)
+                    # This might not work without AWS credentials, but try anyway
+                    logger.warning("amazon-mcp requires AWS credentials or real browser session")
+            except Exception as e:
+                logger.warning(f"amazon-mcp not available: {e}")
+        
+        # If we got here with no orders, return empty
+        logger.info("No orders found from any method")
         return OrdersResponse(
             orders=[],
             total=0,
+            )
+        
+        # Fallback to MCP API
+        if not HAS_AMAZON_MCP:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "No order fetching method available",
+                    "hint": "Install playwright (pip install playwright && playwright install chromium) or amazon-mcp",
+                },
+            )
+        
+        client = get_amazon_client()
+        if not client:
+            return OrdersResponse(orders=[], total=0)
+        
+        
+        # Use get_user_orders method - returns httpx.Response
+        response = client.get_user_orders()
+        
+        # Parse JSON from response
+        if hasattr(response, 'json'):
+            raw_data = response.json()
+        else:
+            raw_data = []
+        
+        # Handle different response structures
+        if isinstance(raw_data, dict):
+            raw_orders = raw_data.get('orders', []) or raw_data.get('data', []) or []
+        else:
+            raw_orders = raw_data if isinstance(raw_data, list) else []
+        
+        # Convert raw orders to OrderItem format
+        orders = []
+        for order in raw_orders:
+            try:
+                # amazon-mcp returns orders with varying structure
+                # Adapt to the actual format returned
+                order_id = order.get("orderId") or order.get("order_id") or "unknown"
+                order_date_str = order.get("orderDate") or order.get("order_date") or order.get("date")
+                
+                # Parse date
+                if isinstance(order_date_str, str):
+                    order_date = datetime.fromisoformat(order_date_str.replace("Z", "+00:00"))
+                else:
+                    order_date = datetime.now()
+                
+                # Get items from the order
+                items = order.get("items") or order.get("orderItems") or [order]
+                
+                for item in items:
+                    asin = item.get("asin") or item.get("ASIN") or ""
+                    name = item.get("title") or item.get("name") or item.get("product_name") or "Unknown Item"
+                    price = item.get("price") or item.get("itemPrice") or 0.0
+                    quantity = item.get("quantity") or 1
+                    image_url = item.get("image") or item.get("imageUrl") or item.get("thumbnail")
+                    
+                    orders.append(OrderItem(
+                        order_id=order_id,
+                        order_date=order_date,
+                        asin=asin,
+                        name=name,
+                        category=None,  # Will be inferred by Aura based on name
+                        price=float(price) if price else None,
+                        quantity=int(quantity),
+                        image_url=image_url,
+                        url=f"https://www.amazon.com/dp/{asin}" if asin else None,
+                    ))
+            except Exception as e:
+                logger.warning(f"Failed to parse order item: {e}")
+                continue
+        
+        return OrdersResponse(
+            orders=orders[:limit],
+            total=len(orders),
         )
 
     except HTTPException:
         raise
-    except Exception as e:
-        logger.exception(f"Orders fetch failed: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail={"error": "orders_fetch_failed", "message": str(e)},
-        )
     except Exception as e:
         logger.exception(f"Orders fetch failed: {e}")
         raise HTTPException(

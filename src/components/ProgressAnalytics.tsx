@@ -3,41 +3,43 @@
 import { useMemo, useState } from "react";
 import { useStore } from "@/hooks/useStore";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { TrendingUp, Target, Calendar, Award } from "lucide-react";
+import { TrendingUp, Target, Calendar, Award, Sparkles } from "lucide-react";
+import { ProgressTracker } from "./ProgressTracker";
+import clsx from "clsx";
 
 export function ProgressAnalytics() {
     const { 
-        measurements, 
-        sissyGoals, 
-        sissyLogs, 
-        clitMeasurements,
-        chastitySessions,
-        workoutSessions 
+        measurements = [], 
+        sissyGoals = [], 
+        sissyLogs = [], 
+        clitMeasurements = [],
+        chastitySessions = [],
+        workoutSessions = []
     } = useStore();
 
-    const [activeTab, setActiveTab] = useState<"measurements" | "goals" | "clit" | "workouts">("measurements");
+    const [activeTab, setActiveTab] = useState<"progress" | "measurements" | "goals" | "clit" | "workouts">("progress");
 
     // Measurement trends (last 10)
     const measurementTrend = useMemo(() => {
-        return measurements
-            .sort((a, b) => (a.dateLogged ?? 0) - (b.dateLogged ?? 0))
+        return (measurements || [])
+            .sort((a, b) => (a.date ?? 0) - (b.date ?? 0))
             .slice(-10)
             .map((m) => ({
-                date: new Date(m.dateLogged ?? 0).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-                waist: m.waist,
-                bust: m.bust,
-                hips: m.hips,
-                weight: m.weight || 0,
+                date: new Date(m.date ?? 0).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                waist: m.values?.waist,
+                bust: m.values?.bust,
+                hips: m.values?.hips,
+                weight: m.values?.weight || 0,
             }));
     }, [measurements]);
 
     // Clit size trend
     const clitTrend = useMemo(() => {
-        return clitMeasurements
-            .sort((a, b) => (a.dateLogged ?? 0) - (b.dateLogged ?? 0))
+        return (clitMeasurements || [])
+            .sort((a, b) => (a.date ?? 0) - (b.date ?? 0))
             .slice(-10)
             .map((c) => ({
-                date: new Date(c.dateLogged ?? 0).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                date: new Date(c.date ?? 0).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
                 length: c.lengthMm || 0,
                 width: c.widthMm || 0,
             }));
@@ -45,8 +47,9 @@ export function ProgressAnalytics() {
 
     // Goal progress
     const goalProgress = useMemo(() => {
-        const completed = sissyGoals.filter((g) => g.completed).length;
-        const total = sissyGoals.length;
+        const goalsArray = sissyGoals || [];
+        const completed = goalsArray.filter((g) => g.completed).length;
+        const total = goalsArray.length;
         return {
             completed,
             total,
@@ -58,8 +61,9 @@ export function ProgressAnalytics() {
     const workoutStats = useMemo(() => {
         const thisWeek = new Date();
         thisWeek.setDate(thisWeek.getDate() - 7);
-        const weekSessions = workoutSessions.filter((s) => (s.dateLogged ?? 0) > thisWeek.getTime());
-        const totalMinutes = weekSessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
+        const sessions = workoutSessions || [];
+        const weekSessions = sessions.filter((s) => (s.date ?? 0) > thisWeek.getTime());
+        const totalMinutes = weekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
         return {
             count: weekSessions.length,
             totalMinutes,
@@ -69,7 +73,8 @@ export function ProgressAnalytics() {
 
     // Chastity tracking
     const chastityStat = useMemo(() => {
-        const current = chastitySessions.find((c) => !c.endDate);
+        const sessions = chastitySessions || [];
+        const current = sessions.find((c) => !c.endDate);
         if (!current) return { locked: false, days: 0 };
         const days = Math.floor(((current.endDate ? new Date(current.endDate).getTime() : Date.now()) - (current.startDate ?? 0)) / (1000 * 60 * 60 * 24));
         return { locked: true, days, model: current.cageModel };
@@ -100,7 +105,7 @@ export function ProgressAnalytics() {
                     icon={<TrendingUp className="w-5 h-5" />}
                     label="Measurements Logged"
                     value={measurements.length}
-                    subtext={`Latest: ${new Date(measurements[measurements.length - 1]?.dateLogged ?? 0).toLocaleDateString()}`}
+                    subtext={`Latest: ${new Date(measurements[measurements.length - 1]?.date ?? 0).toLocaleDateString()}`}
                 />
                 <StatCard 
                     icon={<Award className="w-5 h-5" />}
@@ -112,8 +117,9 @@ export function ProgressAnalytics() {
 
             {/* Charts */}
             <div className="space-y-4">
-                <div className="flex gap-2 border-b">
+                <div className="flex gap-2 border-b overflow-x-auto pb-2">
                     {[
+                        { id: "progress", label: "Progress Tracker", icon: <Sparkles className="w-4 h-4" />, enabled: true },
                         { id: "measurements", label: "Body Measurements", enabled: measurementTrend.length > 0 },
                         { id: "clit", label: "Clit Growth", enabled: clitTrend.length > 0 },
                         { id: "goals", label: "Goal Progress", enabled: sissyGoals.length > 0 },
@@ -123,16 +129,22 @@ export function ProgressAnalytics() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
                             disabled={!tab.enabled}
-                            className={`px-4 py-2 border-b-2 transition ${
+                            className={clsx(
+                                "px-4 py-2 border-b-2 transition whitespace-nowrap flex items-center gap-2",
                                 activeTab === tab.id
                                     ? "border-primary text-primary font-semibold"
-                                    : "border-transparent text-muted-foreground hover:text-foreground"
-                            } ${!tab.enabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    : "border-transparent text-muted-foreground hover:text-foreground",
+                                !tab.enabled && "opacity-50 cursor-not-allowed"
+                            )}
                         >
+                            {tab.icon}
                             {tab.label}
                         </button>
                     ))}
                 </div>
+
+                {/* Progress Tracker Tab */}
+                {activeTab === "progress" && <ProgressTracker />}
 
                 {/* Measurement Chart */}
                 {activeTab === "measurements" && measurementTrend.length > 0 && (
@@ -202,8 +214,8 @@ export function ProgressAnalytics() {
                     <div className="space-y-3">
                         <ResponsiveContainer width="100%" height={250}>
                             <BarChart data={workoutSessions.slice(-7).map((s) => ({
-                                date: new Date(s.dateLogged ?? 0).toLocaleDateString("en-US", { weekday: "short" }),
-                                duration: s.durationMinutes || 0,
+                                date: new Date(s.date ?? 0).toLocaleDateString("en-US", { weekday: "short" }),
+                                duration: s.duration || 0,
                             }))}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="date" />

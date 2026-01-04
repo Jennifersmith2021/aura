@@ -3,18 +3,26 @@
 import { useStore } from "@/hooks/useStore";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemModal } from "@/components/AddItemModal";
+import { AmazonOrderSync } from "@/components/AmazonOrderSync";
+import { AmazonImport } from "@/components/AmazonImport";
+import { AmazonSettings } from "@/components/AmazonSettings";
+import { DebugPanel } from "@/components/DebugPanel";
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Package, Settings } from "lucide-react";
 import { Category } from "@/types";
 import { PageTransition } from "@/components/PageTransition";
 
 export default function ClosetPage() {
     const { items, loading, addItem, removeItem } = useStore();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [showAmazonImport, setShowAmazonImport] = useState(false);
+    const [showAmazonSettings, setShowAmazonSettings] = useState(false);
+    const [credentialsSaved, setCredentialsSaved] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<Category | "all">("all");
+    const [showAllTypes, setShowAllTypes] = useState(false);
 
-    const clothingItems = items.filter((i) => i.type === "clothing");
+    const clothingItems = items.filter((i) => showAllTypes || i.type === "clothing");
 
     const filteredItems = clothingItems.filter((item) => {
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -23,21 +31,109 @@ export default function ClosetPage() {
         return matchesSearch && matchesFilter;
     });
 
-    const categories: Category[] = ["top", "bottom", "dress", "shoe", "outerwear", "accessory"];
+    const categories: Category[] = ["top", "bottom", "dress", "shoe", "outerwear", "accessory", "legging"];
 
     if (loading) return <div className="p-8 text-center">Loading Closet...</div>;
 
     return (
         <PageTransition className="pb-24 pt-8 px-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Virtual Closet</h1>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="bg-primary text-white p-2 rounded-full shadow-lg hover:bg-primary/90"
-                >
-                    <Plus className="w-6 h-6" />
-                </button>
+            <div className="flex items-center justify-between gap-2">
+                <div>
+                    <h1 className="text-2xl font-bold">Virtual Closet</h1>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        {clothingItems.length} items total
+                        {!showAllTypes && items.length > clothingItems.length && (
+                            <button
+                                onClick={() => setShowAllTypes(true)}
+                                className="ml-2 text-primary underline"
+                            >
+                                (show all {items.length} items)
+                            </button>
+                        )}
+                        {showAllTypes && (
+                            <button
+                                onClick={() => setShowAllTypes(false)}
+                                className="ml-2 text-primary underline"
+                            >
+                                (clothing only)
+                            </button>
+                        )}
+                    </p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-primary text-white p-2 rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+                        title="Add item manually"
+                    >
+                        <Plus className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={() => setShowAmazonImport(!showAmazonImport)}
+                        className="bg-amber-500 text-white p-2 rounded-full shadow-lg hover:bg-amber-600 transition-colors"
+                        title="Import from Amazon orders"
+                    >
+                        <Package className="w-6 h-6" />
+                    </button>
+                </div>
             </div>
+
+            {/* Amazon Import Section */}
+            {showAmazonImport && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 space-y-4">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <h2 className="font-semibold text-amber-900 dark:text-amber-100">
+                                Import from Amazon
+                            </h2>
+                            <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                                Pull your past Amazon purchases into your closet
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowAmazonImport(false)}
+                            className="text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => setShowAmazonSettings((prev) => !prev)}
+                            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border border-amber-300 bg-white/80 dark:bg-amber-900/40 hover:bg-white"
+                        >
+                            <Settings className="w-4 h-4" />
+                            Manage Amazon credentials
+                        </button>
+                        {credentialsSaved && (
+                            <span className="text-xs text-amber-700 dark:text-amber-200">{credentialsSaved}</span>
+                        )}
+                    </div>
+
+                    {showAmazonSettings && (
+                        <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-white/70 dark:bg-amber-900/30 p-3">
+                            <AmazonSettings
+                                onSave={async (creds) => {
+                                    try {
+                                        localStorage.setItem("amazonCredentials", JSON.stringify(creds));
+                                        setCredentialsSaved("Credentials saved locally");
+                                    } catch (e) {
+                                        console.error("Failed to store credentials", e);
+                                        setCredentialsSaved("Unable to save locally; please check storage permissions");
+                                    }
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {/* CSV/PDF Import */}
+                    <AmazonImport />
+
+                    {/* Live Order Sync */}
+                    <AmazonOrderSync />
+                </div>
+            )}
 
             {/* Search & Filter */}
             <div className="space-y-3">
@@ -99,6 +195,9 @@ export default function ClosetPage() {
                 onAdd={addItem}
                 defaultType="clothing"
             />
+            
+            {/* Debug Panel */}
+            <DebugPanel />
         </PageTransition>
     );
 }

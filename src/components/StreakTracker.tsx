@@ -15,10 +15,10 @@ export interface DailyHabit {
 
 export function StreakTracker() {
     const { 
-        workoutSessions, 
-        dailyAffirmations, 
-        supplements,
-        chastitySessions 
+        workoutSessions = [], 
+        dailyAffirmations = [], 
+        supplements = [],
+        chastitySessions = []
     } = useStore();
 
     // Calculate streaks based on logged activities
@@ -28,8 +28,8 @@ export function StreakTracker() {
 
         // Workout streak
         const workoutDates = new Set(
-            workoutSessions.map((s) => {
-                const d = new Date(s.dateLogged ?? 0);
+            (workoutSessions || []).map((s) => {
+                const d = new Date(s.date ?? 0);
                 return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
             })
         );
@@ -37,8 +37,8 @@ export function StreakTracker() {
 
         // Affirmation streak (using daily affirmations)
         const affirmationDates = new Set(
-            dailyAffirmations.map((a) => {
-                const d = new Date(a.dateLogged ?? 0);
+            (dailyAffirmations || []).map((a) => {
+                const d = new Date(a.dateAdded ?? 0);
                 return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
             })
         );
@@ -46,15 +46,15 @@ export function StreakTracker() {
 
         // Supplement streak
         const supplementDates = new Set(
-            supplements.map((s) => {
-                const d = new Date(s.dateLogged ?? 0);
+            (supplements || []).map((s) => {
+                const d = new Date(s.date ?? 0);
                 return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
             })
         );
         const supplementStreak = calculateStreak(supplementDates, today);
 
         // Chastity status
-        const activeLock = chastitySessions.find((c) => !c.endDate);
+        const activeLock = (chastitySessions || []).find((c) => !c.endDate);
         const chastityCurrent = activeLock ? Math.floor((Date.now() - (activeLock.startDate ?? 0)) / (1000 * 60 * 60 * 24)) : 0;
 
         return [
@@ -64,7 +64,7 @@ export function StreakTracker() {
                 emoji: "💪",
                 currentStreak: workoutStreak,
                 longestStreak: Math.max(...Array.from(workoutDates).map((_, i, arr) => calculateStreak(new Set(arr.slice(0, i + 1)), today)), 0),
-                lastCompletedDate: workoutSessions[workoutSessions.length - 1]?.dateLogged,
+                lastCompletedDate: workoutSessions[workoutSessions.length - 1]?.date,
             },
             {
                 id: "affirmation",
@@ -72,7 +72,7 @@ export function StreakTracker() {
                 emoji: "✨",
                 currentStreak: affirmationStreak,
                 longestStreak: Math.max(...Array.from(affirmationDates).map((_, i, arr) => calculateStreak(new Set(arr.slice(0, i + 1)), today)), 0),
-                lastCompletedDate: dailyAffirmations[dailyAffirmations.length - 1]?.dateLogged,
+                lastCompletedDate: dailyAffirmations[dailyAffirmations.length - 1]?.dateAdded,
             },
             {
                 id: "supplement",
@@ -80,7 +80,7 @@ export function StreakTracker() {
                 emoji: "💊",
                 currentStreak: supplementStreak,
                 longestStreak: Math.max(...Array.from(supplementDates).map((_, i, arr) => calculateStreak(new Set(arr.slice(0, i + 1)), today)), 0),
-                lastCompletedDate: supplements[supplements.length - 1]?.dateLogged,
+                lastCompletedDate: supplements[supplements.length - 1]?.date,
             },
             {
                 id: "chastity",

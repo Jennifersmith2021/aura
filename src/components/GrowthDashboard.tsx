@@ -14,11 +14,12 @@ function deltaLabel(delta?: number, unit = "") {
 }
 
 export default function GrowthDashboard() {
-    const { measurements } = useStore();
+    const { measurements = [] } = useStore();
 
     const { chartData, deltas, alerts } = useMemo(() => {
-        if (!measurements.length) return { chartData: [], deltas: {} as Record<string, number | undefined>, alerts: [] as string[] };
-        const sorted = [...measurements].sort((a, b) => a.date - b.date);
+        const entries = measurements || [];
+        if (!entries.length) return { chartData: [], deltas: {} as Record<string, number | undefined>, alerts: [] as string[] };
+        const sorted = [...entries].sort((a, b) => a.date - b.date);
         const latest = sorted[sorted.length - 1];
         const first = sorted[0];
 

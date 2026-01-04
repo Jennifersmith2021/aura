@@ -6,11 +6,12 @@ import { useStore } from "@/hooks/useStore";
 import clsx from "clsx";
 
 export default function MeasurementPhotoCompare() {
-    const { measurements } = useStore();
+    const { measurements = [] } = useStore();
     const [selectedIndices, setSelectedIndices] = useState<[number, number]>([0, 1]);
 
     const photosWithDates = useMemo(() => {
-        return measurements
+        const entries = measurements || [];
+        return entries
             .filter((m) => m.photo)
             .map((m, idx) => ({
                 idx,

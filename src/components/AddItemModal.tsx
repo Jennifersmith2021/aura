@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Loader2, Wand2, Plus } from "lucide-react";
 import Image from "next/image";
 import { Item, Category } from "@/types";
@@ -10,26 +10,47 @@ import { cn } from "@/lib/utils";
 interface AddItemModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (item: Item) => void;
+    onAdd?: (item: Item) => void;
+    onSave?: (item: Item) => void;
+    initialItem?: Item;
     defaultType?: "clothing" | "makeup";
 }
 
-export function AddItemModal({ isOpen, onClose, onAdd, defaultType = "clothing" }: AddItemModalProps) {
-    const [type, setType] = useState<"clothing" | "makeup">(defaultType);
+export function AddItemModal({ isOpen, onClose, onAdd, onSave, initialItem, defaultType = "clothing" }: AddItemModalProps) {
+    const isEdit = Boolean(initialItem);
+    const [type, setType] = useState<"clothing" | "makeup">(initialItem?.type || defaultType);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        url: "",
-        name: "",
-        brand: "",
-        price: "",
-        image: "",
-        category: "top" as Category,
-        color: "",
+        url: initialItem?.purchaseUrl || "",
+        name: initialItem?.name || "",
+        brand: initialItem?.brand || "",
+        price: initialItem?.price ? String(initialItem.price) : "",
+        image: initialItem?.image || "",
+        category: (initialItem?.category as Category) || (initialItem?.type === "makeup" ? "face" : "top"),
+        color: initialItem?.color || "",
     });
 
     const [error, setError] = useState("");
 
-    if (!isOpen) return null;
+    // Reset form when opening with a different item
+    useEffect(() => {
+        if (!isOpen) return;
+        if (initialItem) {
+            setType(initialItem.type);
+            setFormData({
+                url: initialItem.purchaseUrl || "",
+                name: initialItem.name || "",
+                brand: initialItem.brand || "",
+                price: initialItem.price ? String(initialItem.price) : "",
+                image: initialItem.image || "",
+                category: (initialItem.category as Category) || (initialItem.type === "makeup" ? "face" : "top"),
+                color: initialItem.color || "",
+            });
+        } else {
+            setType(defaultType);
+            setFormData({ url: "", name: "", brand: "", price: "", image: "", category: "top", color: "" });
+        }
+    }, [initialItem, isOpen, defaultType]);
 
     const handleAutoFill = async () => {
         if (!formData.url) return;
@@ -96,8 +117,8 @@ export function AddItemModal({ isOpen, onClose, onAdd, defaultType = "clothing" 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const newItem: Item = {
-            id: uuidv4(),
+        const payload: Item = {
+            id: initialItem?.id || uuidv4(),
             name: formData.name,
             type,
             category: formData.category,
@@ -106,25 +127,36 @@ export function AddItemModal({ isOpen, onClose, onAdd, defaultType = "clothing" 
             image: formData.image,
             color: formData.color,
             purchaseUrl: formData.url,
-            dateAdded: Date.now(),
-            dateOpened: type === "makeup" ? Date.now() : undefined,
+            dateAdded: initialItem?.dateAdded || Date.now(),
+            dateOpened: type === "makeup" ? (initialItem?.dateOpened || Date.now()) : undefined,
+            importMeta: initialItem?.importMeta,
+            notes: initialItem?.notes,
+            wishlist: initialItem?.wishlist,
+            userId: initialItem?.userId,
         };
-        onAdd(newItem);
+
+        if (isEdit && onSave) {
+            onSave(payload);
+        } else if (onAdd) {
+            onAdd(payload);
+        }
         onClose();
         // Reset form
         setFormData({ url: "", name: "", brand: "", price: "", image: "", category: "top", color: "" });
     };
 
     const categories: Category[] = type === "clothing"
-        ? ["top", "bottom", "dress", "shoe", "outerwear", "accessory"]
-        : ["face", "eye", "lip", "cheek", "tool"];
+        ? ["top", "bottom", "dress", "shoe", "outerwear", "accessory", "legging", "other"]
+        : ["face", "eye", "lip", "cheek", "tool", "other"];
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="p-4 border-b border-border flex items-center justify-between">
-                    <h2 className="font-semibold text-lg">Add New Item</h2>
+                    <h2 className="font-semibold text-lg">{isEdit ? "Edit Item" : "Add New Item"}</h2>
                     <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
                         <X className="w-5 h-5" />
                     </button>
@@ -274,7 +306,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, defaultType = "clothing" 
                         className="w-full bg-primary text-primary-foreground font-medium py-3 rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                     >
                         <Plus className="w-4 h-4" />
-                        Add to {type === "clothing" ? "Closet" : "Vanity"}
+                        {isEdit ? "Save Changes" : `Add to ${type === "clothing" ? "Closet" : "Vanity"}`}
                     </button>
                 </div>
             </div>

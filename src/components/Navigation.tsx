@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Shirt, Sparkles, Menu, Brush, ShoppingBag, TrendingUp } from "lucide-react";
+import { Home, Shirt, Sparkles, Menu, Brush, ShoppingBag, TrendingUp, Dumbbell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Navigation() {
@@ -12,8 +12,8 @@ export function Navigation() {
         { href: "/", label: "Home", icon: Home },
         { href: "/closet", label: "Closet", icon: Shirt },
         { href: "/shopping", label: "Shop", icon: ShoppingBag },
-        { href: "/analytics", label: "Analytics", icon: TrendingUp },
-        { href: "/studio", label: "Studio", icon: Menu },
+        { href: "/training", label: "Training", icon: Dumbbell },
+        { href: "/settings", label: "Settings", icon: Settings },
     ];
 
     return (

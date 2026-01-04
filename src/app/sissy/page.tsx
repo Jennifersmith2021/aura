@@ -33,8 +33,9 @@ import ArousalTracker from "@/components/ArousalTracker";
 import OutfitOfTheDay from "@/components/OutfitOfTheDay";
 import MakeupTutorialTracker from "@/components/MakeupTutorialTracker";
 import GrowthDashboard from "@/components/GrowthDashboard";
+import { SissificationTracker } from "@/components/SissificationTracker";
 
-type Tab = "training" | "achievements" | "challenges" | "chastity" | "orgasms" | "arousal" | "toys" | "compliments" | "voice" | "posture" | "photos" | "schedule" | "skincare" | "sitting" | "walking" | "measurements" | "affirmations" | "yoga" | "workouts" | "outfits" | "ootd" | "makeup" | "daily-challenges" | "hormones" | "personas";
+type Tab = "training" | "achievements" | "challenges" | "chastity" | "orgasms" | "arousal" | "toys" | "compliments" | "voice" | "posture" | "photos" | "schedule" | "skincare" | "sitting" | "walking" | "measurements" | "affirmations" | "yoga" | "workouts" | "outfits" | "ootd" | "makeup" | "daily-challenges" | "hormones" | "personas" | "sissy-tracker";
 
 export default function SissyPage() {
     const [activeTab, setActiveTab] = useState<Tab>("training");
@@ -43,6 +44,7 @@ export default function SissyPage() {
         {
             label: "Daily",
             tabs: [
+                { id: "sissy-tracker", label: "Daily Tasks", icon: Target },
                 { id: "schedule", label: "Schedule", icon: Calendar },
                 { id: "affirmations", label: "Affirmations", icon: Sparkles },
                 { id: "daily-challenges", label: "Daily Challenges", icon: Zap },
@@ -115,7 +117,7 @@ export default function SissyPage() {
                 <div className="px-4 py-3 overflow-x-auto">
                     <div className="flex gap-2 min-w-max">
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {tabGroups.flatMap(g => g.tabs).map((tab: any) => {
+                        {(tabGroups as any).flatMap((g: any) => g.tabs).map((tab: any) => {
                             const Icon = tab.icon;
                             return (
                                 <button
@@ -160,6 +162,21 @@ export default function SissyPage() {
                             </div>
                             <DailySchedule />
                             <DailyProgressSummary />
+                        </div>
+                    )}
+
+                    {activeTab === "sissy-tracker" && (
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-500/20">
+                                <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+                                    <Sparkles className="w-6 h-6 text-purple-500" />
+                                    Sissification Progress Tracker
+                                </h2>
+                                <p className="text-muted-foreground font-medium mb-4">
+                                    Complete daily tasks, earn XP, level up, and track your sissy transformation
+                                </p>
+                            </div>
+                            <SissificationTracker />
                         </div>
                     )}
 

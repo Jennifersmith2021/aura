@@ -35,7 +35,11 @@ export function SessionSync() {
 
       try {
         const res = await fetch("/api/sync/items", { cache: "no-store" });
-        if (!res.ok) throw new Error(`Sync fetch failed: ${res.status}`);
+        if (!res.ok) {
+          // Don't throw error for expected failures (404, 401, etc.)
+          console.warn(`Sync endpoint not available: ${res.status}`);
+          return;
+        }
         const data = await res.json();
         const serverItems = (data.items || []) as Item[];
         const merged = mergeItems(serverItems, items);
@@ -48,7 +52,7 @@ export function SessionSync() {
           body: JSON.stringify({ items: merged }),
         });
       } catch (err) {
-        console.error("Session sync failed", err);
+        console.warn("Session sync failed (continuing with local data)", err);
       }
     };
 

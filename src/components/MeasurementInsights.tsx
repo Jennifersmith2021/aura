@@ -34,11 +34,12 @@ function inferCup(bust?: number, band?: number) {
 }
 
 export default function MeasurementInsights() {
-    const { measurements } = useStore();
+    const { measurements = [] } = useStore();
 
     const { latest, first, deltas, whr, whrDelta, cupSize, clitTrendData, hipTrendData } = useMemo(() => {
-        const latestEntry = measurements[0];
-        const firstEntry = measurements[measurements.length - 1];
+        const entries = measurements || [];
+        const latestEntry = entries[0];
+        const firstEntry = entries[entries.length - 1];
 
         const latestValues = latestEntry?.values;
         const firstValues = firstEntry?.values;

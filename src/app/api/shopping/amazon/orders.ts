@@ -16,9 +16,10 @@ import { authOptions } from "@/lib/authOptions";
 
 export async function GET(request: NextRequest) {
   try {
-    // Optional: require authentication
+    // Allow unauthenticated access in development to simplify local testing.
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const isDev = process.env.NODE_ENV !== "production";
+    if (!session?.user && !isDev) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
           { status: 503 }
         );
       }
-      throw new Error(`Adapter error: ${response.status}`);
+      const text = await response.text();
+      throw new Error(`Adapter error: ${response.status} ${text}`);
     }
 
     const data = await response.json();

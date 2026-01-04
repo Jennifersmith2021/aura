@@ -112,6 +112,7 @@ export interface MakeupTutorial {
     practiceCount: number;
     lastPracticed?: number;
     note?: string;
+    imageUrl?: string;
 }
 
 export interface SkincareProduct {
