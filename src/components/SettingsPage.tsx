@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { Settings, Save, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import DataExport from "@/components/DataExport";
+import { ExportImport } from "@/components/ExportImport";
+import { NotificationSettings } from "@/components/NotificationSettings";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 
 interface ApiSettings {
     googleApiKey?: string;
@@ -226,6 +230,26 @@ export function SettingsPage() {
                         Prefer local adapter over Gemini API
                     </label>
                 </div>
+            </div>
+
+            {/* Data Management Section */}
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700 space-y-6">
+                <h2 className="text-xl font-bold">Data Management</h2>
+                <DataExport />
+                <hr className="border-slate-200 dark:border-slate-700" />
+                <ExportImport />
+            </div>
+
+            {/* Notifications Section */}
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="text-xl font-bold mb-4">Notifications & Reminders</h2>
+                <NotificationSettings />
+            </div>
+
+            {/* Analytics Section */}
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="text-xl font-bold mb-4">Analytics</h2>
+                <AnalyticsDashboard />
             </div>
 
             {/* Debug Section */}

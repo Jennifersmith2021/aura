@@ -7,10 +7,13 @@ import { AmazonOrderSync } from "@/components/AmazonOrderSync";
 import { AmazonImport } from "@/components/AmazonImport";
 import { AmazonSettings } from "@/components/AmazonSettings";
 import { DebugPanel } from "@/components/DebugPanel";
+import AdvancedSearch from "@/components/AdvancedSearch";
+import { WardrobeGapAnalyzer } from "@/components/WardrobeGapAnalyzer";
 import { useState } from "react";
 import { Plus, Search, Package, Settings } from "lucide-react";
 import { Category } from "@/types";
 import { PageTransition } from "@/components/PageTransition";
+import { toast } from "@/lib/toast";
 
 export default function ClosetPage() {
     const { items, loading, addItem, removeItem } = useStore();
@@ -21,6 +24,7 @@ export default function ClosetPage() {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<Category | "all">("all");
     const [showAllTypes, setShowAllTypes] = useState(false);
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
 
     const clothingItems = items.filter((i) => showAllTypes || i.type === "clothing");
 
@@ -135,43 +139,69 @@ export default function ClosetPage() {
                 </div>
             )}
 
-            {/* Search & Filter */}
-            <div className="space-y-3">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input
-                        type="text"
-                        placeholder="Search clothes..."
-                        className="w-full bg-white dark:bg-slate-800 pl-9 pr-4 py-3 rounded-xl border border-border outline-none focus:ring-2 focus:ring-primary/20"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
+            {/* Wardrobe Gap Analyzer */}
+            {clothingItems.length > 0 && <WardrobeGapAnalyzer />}
 
-                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    <button
-                        onClick={() => setFilter("all")}
-                        className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filter === "all"
-                                ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                            }`}
-                    >
-                        All
-                    </button>
-                    {categories.map((cat) => (
+            {/* Search & Filter */}
+            {!showAdvancedSearch ? (
+                <div className="space-y-3">
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                placeholder="Search clothes..."
+                                className="w-full bg-white dark:bg-slate-800 pl-9 pr-4 py-3 rounded-xl border border-border outline-none focus:ring-2 focus:ring-primary/20"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
                         <button
-                            key={cat}
-                            onClick={() => setFilter(cat)}
-                            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filter === cat
+                            onClick={() => setShowAdvancedSearch(true)}
+                            className="px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors text-sm font-semibold"
+                        >
+                            Advanced
+                        </button>
+                    </div>
+
+                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                        <button
+                            onClick={() => setFilter("all")}
+                            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filter === "all"
                                     ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                                 }`}
                         >
-                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            All
                         </button>
-                    ))}
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setFilter(cat)}
+                                className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filter === cat
+                                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                    }`}
+                            >
+                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">Advanced Search</h2>
+                        <button
+                            onClick={() => setShowAdvancedSearch(false)}
+                            className="text-sm text-muted-foreground hover:text-foreground"
+                        >
+                            Back to simple search
+                        </button>
+                    </div>
+                    <AdvancedSearch />
+                </div>
+            )}
 
             {/* Grid */}
             <div className="grid grid-cols-2 gap-4">
@@ -192,7 +222,10 @@ export default function ClosetPage() {
             <AddItemModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                onAdd={addItem}
+                onAdd={(item) => {
+                  addItem(item);
+                  toast.success(`Added ${item.name}!`);
+                }}
                 defaultType="clothing"
             />
             

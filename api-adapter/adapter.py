@@ -432,13 +432,11 @@ async def get_orders(
         if HAS_AMAZON_MCP and Amazon:
             logger.info("Falling back to amazon-mcp SDK for orders...")
             try:
-                email = os.getenv("AMAZON_EMAIL")
-                password = os.getenv("AMAZON_PASSWORD")
-                
-                if email and password:
-                    amazon = Amazon(email=email, password=password)
-                    # This might not work without AWS credentials, but try anyway
-                    logger.warning("amazon-mcp requires AWS credentials or real browser session")
+                # Amazon() auto-detects credentials from environment variables
+                # AMAZON_EMAIL/AMAZON_PASSWORD or AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY
+                amazon = Amazon()
+                # This might not work without AWS credentials, but try anyway
+                logger.warning("amazon-mcp requires AWS credentials or real browser session")
             except Exception as e:
                 logger.warning(f"amazon-mcp not available: {e}")
         

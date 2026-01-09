@@ -2,26 +2,49 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Shirt, Sparkles, Brush, ShoppingBag, Dumbbell, Wind, Target, Heart } from "lucide-react";
+import { Home, Shirt, Sparkles, Brush, ShoppingBag, Dumbbell, Wind, Target, Heart, Package, ListChecks, Settings, Palette, Compass, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
     const pathname = usePathname();
 
-    const links = [
+    const mainLinks = [
         { href: "/", label: "Home", icon: Home },
         { href: "/closet", label: "Closet", icon: Shirt },
-        { href: "/shopping", label: "Shop", icon: ShoppingBag },
+        { href: "/looks", label: "Looks", icon: Sparkles },
+        { href: "/journey", label: "Journey", icon: Compass },
+        { href: "/stats", label: "Stats", icon: BarChart3 },
+    ];
+
+    const styleLinks = [
         { href: "/vanity", label: "Vanity", icon: Brush },
-        { href: "/studio", label: "Studio", icon: Sparkles },
+        { href: "/style-guide", label: "Style Guide", icon: Target },
+        { href: "/color-lab", label: "Color Lab", icon: Palette },
     ];
 
     const trainingLinks = [
-        { href: "/training", label: "Training Hub", icon: Target },
+        { href: "/training", label: "Training Hub", icon: Dumbbell },
         { href: "/training/workouts", label: "Workouts", icon: Dumbbell },
         { href: "/training/affirmations", label: "Affirmations", icon: Sparkles },
         { href: "/training/supplements", label: "Supplements", icon: Heart },
         { href: "/training/logs", label: "Training Logs", icon: Wind },
+    ];
+
+    const wellnessLinks = [
+        { href: "/wellness", label: "Wellness", icon: Heart },
+        { href: "/social", label: "Social", icon: Sparkles },
+        { href: "/sissy", label: "Sissy Journey", icon: Heart },
+    ];
+
+    const shoppingLinks = [
+        { href: "/shopping", label: "Shop", icon: ShoppingBag },
+        { href: "/shopping/recommendations", label: "AI Recs", icon: Sparkles },
+        { href: "/amazon", label: "Amazon Sync", icon: Package },
+        { href: "/wishlist", label: "Wishlist", icon: ListChecks },
+    ];
+
+    const systemLinks = [
+        { href: "/settings", label: "Settings", icon: Settings },
     ];
 
     return (
@@ -45,9 +68,9 @@ export function Sidebar() {
                         Main
                     </h3>
                     <div className="space-y-1">
-                        {links.map((link) => {
+                        {mainLinks.map((link) => {
                             const Icon = link.icon;
-                            const isActive = pathname === link.href;
+                            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
                             return (
                                 <Link
                                     key={link.href}
@@ -67,7 +90,35 @@ export function Sidebar() {
                     </div>
                 </div>
 
-                {/* Training Section */}
+                {/* Style & Fit */}
+                <div>
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+                        Style & Fit
+                    </h3>
+                    <div className="space-y-1">
+                        {styleLinks.map((link) => {
+                            const Icon = link.icon;
+                            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-3 py-3 rounded-lg font-medium text-sm transition-all",
+                                        isActive
+                                            ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md"
+                                            : "text-foreground hover:bg-accent"
+                                    )}
+                                >
+                                    <Icon className="w-5 h-5 shrink-0" />
+                                    <span>{link.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Training */}
                 <div>
                     <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-3">
                         Training
@@ -75,7 +126,91 @@ export function Sidebar() {
                     <div className="space-y-1">
                         {trainingLinks.map((link) => {
                             const Icon = link.icon;
-                            const isActive = pathname.startsWith(link.href);
+                            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-3 py-3 rounded-lg font-medium text-sm transition-all",
+                                        isActive
+                                            ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md"
+                                            : "text-foreground hover:bg-accent"
+                                    )}
+                                >
+                                    <Icon className="w-5 h-5 shrink-0" />
+                                    <span>{link.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Wellness & Social */}
+                <div>
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+                        Wellness & Social
+                    </h3>
+                    <div className="space-y-1">
+                        {wellnessLinks.map((link) => {
+                            const Icon = link.icon;
+                            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-3 py-3 rounded-lg font-medium text-sm transition-all",
+                                        isActive
+                                            ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md"
+                                            : "text-foreground hover:bg-accent"
+                                    )}
+                                >
+                                    <Icon className="w-5 h-5 shrink-0" />
+                                    <span>{link.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Shopping & Sync */}
+                <div>
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+                        Shopping & Sync
+                    </h3>
+                    <div className="space-y-1">
+                        {shoppingLinks.map((link) => {
+                            const Icon = link.icon;
+                            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-3 py-3 rounded-lg font-medium text-sm transition-all",
+                                        isActive
+                                            ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md"
+                                            : "text-foreground hover:bg-accent"
+                                    )}
+                                >
+                                    <Icon className="w-5 h-5 shrink-0" />
+                                    <span>{link.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* System */}
+                <div>
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+                        System
+                    </h3>
+                    <div className="space-y-1">
+                        {systemLinks.map((link) => {
+                            const Icon = link.icon;
+                            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
                             return (
                                 <Link
                                     key={link.href}

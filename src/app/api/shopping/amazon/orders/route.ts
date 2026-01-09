@@ -12,6 +12,10 @@ import { authOptions } from "@/lib/authOptions";
  */
 
 export async function GET(request: NextRequest) {
+  const adapterUrl = process.env.RETAILER_ADAPTER_URL || "http://localhost:8001";
+  const useLocalAdapter = process.env.USE_LOCAL_RETAILER_ADAPTER === "true";
+  const isProduction = process.env.NODE_ENV === "production";
+
   try {
     // Allow unauthenticated access in dev to simplify local testing
     const session = await getServerSession(authOptions);
@@ -24,9 +28,8 @@ export async function GET(request: NextRequest) {
     const days = request.nextUrl.searchParams.get("days");
     // Use test data if explicitly requested
     const forceTest = request.nextUrl.searchParams.get("test") === "true";
-
-    const adapterUrl = process.env.RETAILER_ADAPTER_URL || "http://localhost:8001";
-    const useLocalAdapter = process.env.USE_LOCAL_RETAILER_ADAPTER === "true";
+    // Allow demo fallback via query param if explicitly requested
+    const allowDemo = request.nextUrl.searchParams.get("demo") === "true";
 
     // Try adapter first if enabled (REAL orders from user's Amazon account)
     if (!forceTest && useLocalAdapter) {
@@ -52,15 +55,47 @@ export async function GET(request: NextRequest) {
               message: "Real orders from your Amazon account"
             });
           } else {
-            // Adapter returned 0 orders - fall through to demo data
+            // Adapter returned 0 orders
             console.log("[Amazon Orders] Adapter returned 0 orders. Your Amazon account may be empty, or try real credentials.");
+            
+            // In production mode, don't fallback to demo - return empty list
+            if (isProduction && !allowDemo) {
+              return NextResponse.json({
+                orders: [],
+                total: 0,
+                demo: false,
+                message: "No orders found in your Amazon account",
+              });
+            }
           }
         } else {
-          console.warn(`[Amazon Orders] Adapter returned ${response.status}, will use demo data`);
+          console.warn(`[Amazon Orders] Adapter returned ${response.status}, status: ${response.statusText}`);
+          
+          // In production mode, don't fallback to demo - return error
+          if (isProduction && !allowDemo) {
+            return NextResponse.json(
+              {
+                error: "Failed to connect to Amazon adapter",
+                hint: "Ensure the Python adapter is running on " + adapterUrl,
+              },
+              { status: 502 }
+            );
+          }
         }
       } catch (adapterError) {
-        console.warn("[Amazon Orders] Adapter error, falling back to demo data:", adapterError);
-        // Fall through to demo data
+        console.warn("[Amazon Orders] Adapter error:", adapterError);
+        
+        // In production mode, don't fallback to demo - return error
+        if (isProduction && !allowDemo) {
+          return NextResponse.json(
+            {
+              error: "Failed to connect to Amazon adapter",
+              details: adapterError instanceof Error ? adapterError.message : "Unknown error",
+              hint: `Make sure the Python adapter is running: uvicorn api-adapter.adapter:app --reload --port 8001`,
+            },
+            { status: 502 }
+          );
+        }
       }
     }
 
@@ -156,21 +191,33 @@ export async function GET(request: NextRequest) {
       },
     ];
 
-    return NextResponse.json({
-      orders: testOrders.slice(0, limit),
-      total: testOrders.length,
-      demo: useLocalAdapter ? "fallback" : true, // "fallback" = tried real but got 0, true = demo mode only
-      message: useLocalAdapter 
-        ? "Demo data (adapter returned no orders - your Amazon account may be empty, or try with real credentials)"
-        : "Demo data - To sync real Amazon orders, set USE_LOCAL_RETAILER_ADAPTER=true in .env",
-    });
+    // Return demo data only if in dev mode or explicitly allowed
+    if (!isProduction || allowDemo) {
+      return NextResponse.json({
+        orders: testOrders.slice(0, limit),
+        total: testOrders.length,
+        demo: true,
+        message: "Demo data - This is test data for development purposes. For real orders, ensure the Python adapter is running.",
+      });
+    }
+
+    // In production mode without demo, return error
+    return NextResponse.json(
+      {
+        error: "No real orders available",
+        hint: "The Python adapter is not running. Start it with: uvicorn api-adapter.adapter:app --reload --port 8001",
+      },
+      { status: 503 }
+    );
   } catch (error) {
     console.error("Orders fetch error:", error);
     return NextResponse.json(
       {
         error: "Failed to fetch Amazon orders",
         message: error instanceof Error ? error.message : "Unknown error",
-        hint: "Ensure the Python adapter is running or use test data",
+        hint: isProduction 
+          ? "Ensure the Python adapter is running on " + adapterUrl
+          : "Check adapter status or enable demo mode",
       },
       { status: 500 }
     );

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Shirt, Sparkles, Menu, Brush, ShoppingBag, TrendingUp, Dumbbell, Settings } from "lucide-react";
+import { Home, Shirt, ShoppingBag, Brush, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Navigation() {
@@ -12,8 +12,8 @@ export function Navigation() {
         { href: "/", label: "Home", icon: Home },
         { href: "/closet", label: "Closet", icon: Shirt },
         { href: "/shopping", label: "Shop", icon: ShoppingBag },
+        { href: "/vanity", label: "Vanity", icon: Brush },
         { href: "/training", label: "Training", icon: Dumbbell },
-        { href: "/settings", label: "Settings", icon: Settings },
     ];
 
     return (
@@ -21,7 +21,7 @@ export function Navigation() {
             <div className="flex items-center justify-around h-16 px-4">
                 {links.map((link) => {
                     const Icon = link.icon;
-                    const isActive = pathname === link.href;
+                    const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
                     return (
                         <Link
                             key={link.href}

@@ -18,9 +18,16 @@ export interface Item {
     dateAdded: number;
     dateOpened?: number; // For makeup expiration
     notes?: string;
-    // importer meta (optional) used by CSV importers
+    // importer meta (optional) used by importers (CSV, Amazon, etc)
     importMeta?: {
         confidence?: number; // 0..1
+        source?: string; // e.g., 'ai', 'parsed', 'csv', 'amazon'
+        order_id?: string; // Amazon order ID
+        asin?: string; // Amazon ASIN
+        order_date?: string; // ISO date string
+        quantity?: number; // Quantity ordered
+        url?: string; // Product URL
+        [key: string]: any; // Allow any other metadata
     };
 }
 
@@ -135,6 +142,18 @@ export interface ClitMeasurement {
     method?: string; // Measurement method (ruler, calipers, etc.)
     arousalState?: "unaroused" | "semi-aroused" | "fully-aroused";
     note?: string;
+}
+
+export interface BreastGrowthEntry {
+    id: string;
+    date: number;
+    photo: string; // Base64 image
+    bustCm?: number;
+    underbustCm?: number;
+    weightKg?: number;
+    note?: string;
+    aiSummary?: string;
+    encouragement?: string;
 }
 
 export interface WigItem {
@@ -287,6 +306,25 @@ export interface CorsetSession {
     note?: string;
 }
 
+export interface ButtPlugSession {
+    id: string;
+    startDate: number;
+    endDate?: number;
+    durationMinutes?: number;
+    plugType?: string; // Type/size of plug
+    plugSize?: "small" | "medium" | "large" | "extra-large"; // Size classification
+    material?: string; // Silicone, glass, metal, etc.
+    insertionDepth?: number; // Depth in inches/cm
+    comfortLevel?: 1 | 2 | 3 | 4 | 5; // 1=uncomfortable, 5=very comfortable
+    sensations?: string[]; // Array of sensations (fullness, pressure, tightness, etc.)
+    relaxationLevel?: 1 | 2 | 3 | 4 | 5; // How relaxed the anal opening is
+    arousalLevel?: 1 | 2 | 3 | 4 | 5; // Arousal experienced during session
+    notes?: string;
+    photoUrls?: string[]; // Optional progress photos
+    isTraining?: boolean; // Whether this was part of training
+    wearingOther?: string; // What else was being worn (chastity, corset, etc.)
+}
+
 export interface PackingItem {
     id: string;
     name: string;
@@ -387,4 +425,137 @@ export interface DailyAffirmation {
     videoUrl?: string; // YouTube link for reinforcement videos
     isFavorite?: boolean;
     dateAdded: number;
+}
+
+// New Types for Enhanced Features
+
+export interface Notification {
+    id: string;
+    type: "affirmation" | "workout" | "supplement" | "challenge" | "achievement" | "milestone";
+    title: string;
+    message: string;
+    icon?: string;
+    actionUrl?: string;
+    read: boolean;
+    dateCreated: number;
+    scheduledFor?: number; // For scheduled notifications
+}
+
+export interface NotificationSettings {
+    affirmations: boolean;
+    affirmationTime?: string; // "08:00"
+    workouts: boolean;
+    supplements: boolean;
+    challenges: boolean;
+    achievements: boolean;
+    email: boolean;
+    push: boolean;
+}
+
+export interface Tag {
+    id: string;
+    name: string;
+    color: string; // Hex color
+    icon?: string;
+    dateCreated: number;
+}
+
+export interface Note {
+    id: string;
+    linkedId: string; // Item, Look, Goal, etc.
+    linkedType: "item" | "look" | "goal" | "workout" | "measurement" | "session" | string;
+    title?: string;
+    content: string;
+    richText?: boolean; // For future rich text support
+    dateCreated: number;
+    dateModified: number;
+}
+
+export interface SearchHistory {
+    id: string;
+    query: string;
+    searchType: "items" | "workouts" | "goals" | "all";
+    dateSearched: number;
+}
+
+export interface SavedSearch {
+    id: string;
+    name: string;
+    query: string;
+    filters: Record<string, any>;
+    searchType: string;
+    dateCreated: number;
+}
+
+export interface CalendarEvent {
+    id: string;
+    title: string;
+    date: number;
+    type: "workout" | "chastity" | "corset" | "milestone" | "event" | "challenge";
+    linkedId?: string; // Link to actual item
+    color?: string;
+    notes?: string;
+}
+
+export interface UserTheme {
+    name: string;
+    colors: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+        foreground: string;
+    };
+}
+
+export interface AnalyticsData {
+    measurementTrends: Array<{ date: number; value: number; metric: string }>;
+    workoutStats: {
+        totalWorkouts: number;
+        thisWeek: number;
+        streak: number;
+        totalMinutes: number;
+    };
+    habitStreak: Array<{ date: number; completed: boolean; category: string }>;
+    goalProgress: Array<{ goalId: string; progress: number; target: number }>;
+}
+// Seasonal Features
+export type Season = 'spring' | 'summer' | 'fall' | 'winter';
+export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'hot' | 'cold';
+
+export interface SeasonalChallenge {
+    id: string;
+    title: string;
+    description: string;
+    season: Season;
+    category: 'fashion' | 'fitness' | 'skincare' | 'wellness';
+    startDate: number;
+    endDate: number;
+    rewards?: string[]; // Badge or achievement strings
+    completed: boolean;
+    progress: number; // 0-100
+}
+
+export interface OutfitPack {
+    id: string;
+    name: string;
+    season: Season;
+    itemIds: string[]; // References to Items
+    temperature: { min: number; max: number }; // Celsius
+    weatherTypes: WeatherType[];
+    occasion: string; // 'casual' | 'work' | 'date' | 'party' | 'gym'
+    description?: string;
+    dateCreated: number;
+}
+
+export interface SeasonalGoal {
+    id: string;
+    title: string;
+    season: Season;
+    category: 'fashion' | 'fitness' | 'skincare';
+    target: string;
+    progress: number;
+    completed: boolean;
+    startDate: number;
+    endDate: number;
 }

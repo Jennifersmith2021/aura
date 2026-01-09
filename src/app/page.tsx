@@ -4,8 +4,13 @@ import { useStore } from "@/hooks/useStore";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemModal } from "@/components/AddItemModal";
 import { DailyChallengeWidget } from "@/components/DailyChallengeWidget";
+import DashboardWidget from "@/components/Dashboard";
+import GoalPlanningTools from "@/components/GoalPlanningTools";
+import { QuickMetrics } from "@/components/QuickMetrics";
+import { QuickStatsWidget } from "@/components/QuickStatsWidget";
 import { useState } from "react";
-import { LogIn, LogOut, Plus, Shirt, Sparkles } from "lucide-react";
+import { LogIn, LogOut, Plus, Shirt, Sparkles, LayoutDashboard, Target, Wand2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { PageTransition } from "@/components/PageTransition";
 import { ShoppingWidget } from "@/components/ShoppingWidget";
@@ -15,11 +20,13 @@ import DailySchedule from "@/components/DailySchedule";
 import DailyProgressSummary from "@/components/DailyProgressSummary";
 import AffirmationOfTheDay from "@/components/AffirmationOfTheDay";
 import { useSession, signOut } from "next-auth/react";
+import { clsx } from "clsx";
 
 export default function Dashboard() {
   const { items, loading, addItem } = useStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [quote] = useState(() => getDailyQuote());
+  const [activeView, setActiveView] = useState<"home" | "dashboard" | "goals">("home");
   const { data: session, status } = useSession();
 
   const clothingCount = items.filter((i) => i.type === "clothing").length;
@@ -73,11 +80,37 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Affirmation of the Day */}
-      <AffirmationOfTheDay />
+      {/* View Tabs */}
+      <div className="flex gap-2 border-b border-white/10 pb-2">
+        {[
+          { id: "home", label: "Home", icon: Sparkles },
+          { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { id: "goals", label: "Goals", icon: Target },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveView(tab.id as any)}
+            className={clsx(
+              "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium",
+              activeView === tab.id
+                ? "bg-primary text-white"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+            )}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Daily Challenges */}
-      <DailyChallengeWidget />
+      {/* Home View */}
+      {activeView === "home" && (
+        <>
+          {/* Affirmation of the Day */}
+          <AffirmationOfTheDay />
+
+          {/* Daily Challenges */}
+          <DailyChallengeWidget />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
@@ -111,16 +144,31 @@ export default function Dashboard() {
         <DailyProgressSummary />
       </div>
 
+      {/* Quick Metrics */}
+      <QuickMetrics />
+
+      {/* Quick Stats Widget */}
+      <QuickStatsWidget />
+
       {/* Quick Actions */}
       <div>
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-medium shadow-lg shadow-slate-200 dark:shadow-none active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Add New Item
-        </button>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-medium shadow-lg shadow-slate-200 dark:shadow-none active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Add Item
+          </button>
+          <Link
+            href="/outfit-designer"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-medium shadow-lg shadow-purple-200 dark:shadow-none active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          >
+            <Wand2 className="w-5 h-5" />
+            Design Outfit
+          </Link>
+        </div>
       </div>
 
       {/* Recent Items */}
@@ -150,12 +198,24 @@ export default function Dashboard() {
       <AddItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onAdd={addItem}
+        onAdd={(item) => {
+          addItem(item);
+          toast.success(`Added ${item.name}!`);
+        }}
       />
       {/* Style Journey */}
       <div>
         <Timeline />
       </div>
+        </>
+      )}
+
+      {/* Dashboard View */}
+      {activeView === "dashboard" && <DashboardWidget />}
+
+      {/* Goals View */}
+      {activeView === "goals" && <GoalPlanningTools />}
+
 
     </PageTransition>
   );

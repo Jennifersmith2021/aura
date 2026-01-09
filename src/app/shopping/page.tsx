@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { Search, ShoppingBag, Heart, ExternalLink, Loader2, X } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import { ShoppingItem, ShoppingRetailer, ShoppingCategory } from "@/types";
@@ -11,6 +11,7 @@ import { ShoppingSkeleton } from "@/components/ShoppingSkeleton";
 import { v4 as uuidv4 } from "uuid";
 import { hasAdultConsent } from "@/utils/contentPolicy";
 import { AdultConsentModal } from "@/components/AdultConsentModal";
+import { useSearchParams } from "next/navigation";
 
 type APIProduct = {
     name: string;
@@ -29,8 +30,9 @@ const CATEGORIES: ShoppingCategory[] = [
     "adult", "wellness", "other"
 ];
 
-export default function ShoppingPage() {
+function ShoppingPageContent() {
     const { shoppingItems, addShoppingItem, removeShoppingItem } = useStore();
+    const searchParams = useSearchParams();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedRetailer, setSelectedRetailer] = useState<ShoppingRetailer | "all">("all");
     const [selectedCategory, setSelectedCategory] = useState<ShoppingCategory | "all">("all");
@@ -41,6 +43,37 @@ export default function ShoppingPage() {
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [total, setTotal] = useState(0);
+
+    // Initialize from URL params (from wardrobe gap analyzer)
+    useEffect(() => {
+        const categoryParam = searchParams.get("category");
+        const colorParam = searchParams.get("color");
+        
+        if (categoryParam) {
+            // Map clothing categories to shopping categories
+            const categoryMap: Record<string, string> = {
+                "top": "fashion tops",
+                "bottom": "fashion bottoms", 
+                "dress": "fashion dresses",
+                "shoe": "shoes",
+                "outerwear": "fashion outerwear",
+                "accessory": "accessories",
+                "legging": "fashion leggings"
+            };
+            
+            const searchTerm = categoryMap[categoryParam] || categoryParam;
+            const fullSearch = colorParam ? `${colorParam} ${searchTerm}` : searchTerm;
+            
+            setSearchQuery(fullSearch);
+            setSelectedCategory("fashion");
+            
+            // Auto-trigger search after a short delay
+            setTimeout(() => {
+                const btn = document.querySelector('[data-search-trigger]') as HTMLButtonElement;
+                btn?.click();
+            }, 100);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         // If user previously consented, ensure modal is closed
@@ -153,6 +186,7 @@ export default function ShoppingPage() {
                     <button
                         onClick={handleSearch}
                         disabled={isLoading}
+                        data-search-trigger
                         className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 disabled:opacity-50 transition-colors flex items-center gap-2"
                     >
                         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
@@ -375,5 +409,13 @@ function ShoppingCard({ item, onAdd, onRemove, isInWishlist }: ShoppingCardProps
                 )}
             </div>
         </div>
+    );
+}
+
+export default function ShoppingPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+            <ShoppingPageContent />
+        </Suspense>
     );
 }

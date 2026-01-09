@@ -56,7 +56,7 @@ export function AmazonImport() {
             // Get debug logs for error message
             const logger = (window as any).__debugLogs;
             const logs = logger ? logger.getLogs() : [];
-            const logsSummary = logs.slice(-10).map(l => `${l.message}`).join('\n');
+            const logsSummary = logs.slice(-10).map((l: any) => `${l.message}`).join('\n');
             
             setMessage(`Failed to parse ${type.toUpperCase()}.\n\nDebug info:\n${logsSummary || 'Check debug panel (bottom right) for details'}`);
             setIsUploading(false);

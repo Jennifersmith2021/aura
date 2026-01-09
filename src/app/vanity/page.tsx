@@ -6,6 +6,7 @@ import { AddItemModal } from "@/components/AddItemModal";
 import { RoutineBuilder } from "@/components/RoutineBuilder";
 import SkincareRoutine from "@/components/SkincareRoutine";
 import BeautyGuides from "@/components/BeautyGuides";
+import BreastGrowthTracker from "@/components/BreastGrowthTracker";
 import { useState } from "react";
 import { Plus, Search, AlertCircle } from "lucide-react";
 import { Category } from "@/types";
@@ -17,7 +18,7 @@ export default function VanityPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<Category | "all">("all");
-    const [activeTab, setActiveTab] = useState<"products" | "skincare" | "routines" | "guides">("products");
+    const [activeTab, setActiveTab] = useState<"products" | "skincare" | "routines" | "guides" | "growth">("products");
 
     const makeupItems = items.filter((i) => i.type === "makeup");
 
@@ -84,6 +85,15 @@ export default function VanityPage() {
                 >
                     Guides
                 </button>
+                <button
+                    onClick={() => setActiveTab("growth")}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === "growth"
+                        ? "bg-white dark:bg-slate-800 shadow-sm text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                >
+                    Growth
+                </button>
             </div>
 
             {
@@ -91,6 +101,8 @@ export default function VanityPage() {
                     <SkincareRoutine />
                 ) : activeTab === "guides" ? (
                     <BeautyGuides />
+                ) : activeTab === "growth" ? (
+                    <BreastGrowthTracker />
                 ) : activeTab === "products" ? (
                     <>
                         {/* Search & Filter */}

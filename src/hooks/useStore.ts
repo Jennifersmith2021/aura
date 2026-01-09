@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { get, set, del } from "idb-keyval";
 import { v4 as uuidv4 } from "uuid";
-import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle, SissyTrainingGoal, SissyTrainingLog, ComplimentEntry, PackingList, SupplementLog, WorkoutPlan, WorkoutSession, DailyAffirmation, MakeupTutorial } from "@/types";
+import { Item, Look, MeasurementLog, TimelineEntry, Routine, ShoppingItem, ShoppingList, Inspiration, ColorSeason, ChastitySession, CorsetSession, OrgasmLog, ArousalLog, ToyItem, IntimacyEntry, SkincareProduct, ClitMeasurement, WigItem, HairStyle, SissyTrainingGoal, SissyTrainingLog, ComplimentEntry, PackingList, SupplementLog, WorkoutPlan, WorkoutSession, DailyAffirmation, MakeupTutorial, Notification, NotificationSettings, Tag, Note, SearchHistory, SavedSearch, CalendarEvent, BreastGrowthEntry, ButtPlugSession } from "@/types";
 
 
 export function useStore() {
@@ -19,12 +19,14 @@ export function useStore() {
 
     const [chastitySessions, setChastitySessions] = useState<ChastitySession[]>([]);
     const [corsetSessions, setCorsetSessions] = useState<CorsetSession[]>([]);
+    const [buttPlugSessions, setButtPlugSessions] = useState<ButtPlugSession[]>([]);
     const [orgasmLogs, setOrgasmLogs] = useState<OrgasmLog[]>([]);
     const [arousalLogs, setArousalLogs] = useState<ArousalLog[]>([]);
     const [toyCollection, setToyCollection] = useState<ToyItem[]>([]);
     const [intimacyJournal, setIntimacyJournal] = useState<IntimacyEntry[]>([]);
     const [skincareProducts, setSkincareProducts] = useState<SkincareProduct[]>([]);
     const [clitMeasurements, setClitMeasurements] = useState<ClitMeasurement[]>([]);
+    const [breastGrowth, setBreastGrowth] = useState<BreastGrowthEntry[]>([]);
     const [wigCollection, setWigCollection] = useState<WigItem[]>([]);
     const [hairStyles, setHairStyles] = useState<HairStyle[]>([]);
     const [sissyGoals, setSissyGoals] = useState<SissyTrainingGoal[]>([]);
@@ -39,13 +41,32 @@ export function useStore() {
     const [dailyAffirmations, setDailyAffirmations] = useState<DailyAffirmation[]>([]);
     const [makeupTutorials, setMakeupTutorials] = useState<MakeupTutorial[]>([]);
     
+    // New features (January 2026) - Enhanced functionality
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
+        affirmations: true,
+        affirmationTime: "08:00",
+        workouts: true,
+        supplements: true,
+        challenges: true,
+        achievements: true,
+        email: false,
+        push: true,
+    });
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([]);
+    const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+    const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+    const [favorites, setFavorites] = useState<string[]>([]); // IDs of favorited items
+    
     const [loading, setLoading] = useState(true);
 
     // Load initial data
     useEffect(() => {
         async function loadData() {
             try {
-                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists, storedSupplements, storedWorkoutPlans, storedWorkoutSessions, storedDailyAffirmations, storedMakeupTutorials] = await Promise.all([
+                const [storedItems, storedLooks, storedMeasurements, storedTimeline, storedRoutines, storedShoppingItems, storedShoppingLists, storedInspiration, storedColorSeason, storedChastitySessions, storedCorsetSessions, storedButtPlugSessions, storedOrgasmLogs, storedArousalLogs, storedToyCollection, storedIntimacyJournal, storedSkincareProducts, storedClitMeasurements, storedBreastGrowth, storedWigCollection, storedHairStyles, storedSissyGoals, storedSissyLogs, storedCompliments, storedPackingLists, storedSupplements, storedWorkoutPlans, storedWorkoutSessions, storedDailyAffirmations, storedMakeupTutorials, storedNotifications, storedTags, storedNotes, storedSearchHistory, storedSavedSearches, storedCalendarEvents, storedFavorites] = await Promise.all([
                     get<Item[]>("items"),
                     get<Look[]>("looks"),
                     get<MeasurementLog[]>("measurements"),
@@ -57,12 +78,14 @@ export function useStore() {
                     get<ColorSeason | null>("colorSeason"),
                     get<ChastitySession[]>("chastitySessions"),
                     get<CorsetSession[]>("corsetSessions"),
+                    get<ButtPlugSession[]>("buttPlugSessions"),
                     get<OrgasmLog[]>("orgasmLogs"),
                     get<ArousalLog[]>("arousalLogs"),
                     get<ToyItem[]>("toyCollection"),
                     get<IntimacyEntry[]>("intimacyJournal"),
                     get<SkincareProduct[]>("skincareProducts"),
                     get<ClitMeasurement[]>("clitMeasurements"),
+                    get<BreastGrowthEntry[]>("breastGrowth"),
                     get<WigItem[]>("wigCollection"),
                     get<HairStyle[]>("hairStyles"),
                     get<SissyTrainingGoal[]>("sissyGoals"),
@@ -74,6 +97,13 @@ export function useStore() {
                     get<WorkoutSession[]>("workoutSessions"),
                     get<DailyAffirmation[]>("dailyAffirmations"),
                     get<MakeupTutorial[]>("makeupTutorials"),
+                    get<Notification[]>("notifications"),
+                    get<Tag[]>("tags"),
+                    get<Note[]>("notes"),
+                    get<SearchHistory[]>("searchHistory"),
+                    get<SavedSearch[]>("savedSearches"),
+                    get<CalendarEvent[]>("calendarEvents"),
+                    get<string[]>("favorites"),
                 ]);
 
                 if (storedItems) setItems(storedItems);
@@ -87,12 +117,14 @@ export function useStore() {
                 if (storedColorSeason) setColorSeason(storedColorSeason);
                 if (storedChastitySessions) setChastitySessions(storedChastitySessions);
                 if (storedCorsetSessions) setCorsetSessions(storedCorsetSessions);
+                if (storedButtPlugSessions) setButtPlugSessions(storedButtPlugSessions);
                 if (storedOrgasmLogs) setOrgasmLogs(storedOrgasmLogs);
                 if (storedArousalLogs) setArousalLogs(storedArousalLogs);
                 if (storedToyCollection) setToyCollection(storedToyCollection);
                 if (storedIntimacyJournal) setIntimacyJournal(storedIntimacyJournal);
                 if (storedSkincareProducts) setSkincareProducts(storedSkincareProducts);
                 if (storedClitMeasurements) setClitMeasurements(storedClitMeasurements);
+                if (storedBreastGrowth) setBreastGrowth(storedBreastGrowth);
                 if (storedWigCollection) setWigCollection(storedWigCollection);
                 if (storedHairStyles) setHairStyles(storedHairStyles);
                 if (storedSissyGoals) {
@@ -232,6 +264,13 @@ export function useStore() {
                 if (storedWorkoutSessions) setWorkoutSessions(storedWorkoutSessions);
                 if (storedDailyAffirmations) setDailyAffirmations(storedDailyAffirmations);
                 if (storedMakeupTutorials) setMakeupTutorials(storedMakeupTutorials);
+                if (storedNotifications) setNotifications(storedNotifications);
+                if (storedTags) setTags(storedTags);
+                if (storedNotes) setNotes(storedNotes);
+                if (storedSearchHistory) setSearchHistory(storedSearchHistory);
+                if (storedSavedSearches) setSavedSearches(storedSavedSearches);
+                if (storedCalendarEvents) setCalendarEvents(storedCalendarEvents);
+                if (storedFavorites) setFavorites(storedFavorites);
             } catch (err) {
                 console.error("Failed to load data", err);
             } finally {
@@ -590,6 +629,31 @@ export function useStore() {
         });
     }, []);
 
+    // Breast Growth
+    const addBreastGrowthEntry = useCallback((entry: Omit<BreastGrowthEntry, 'id'>) => {
+        setBreastGrowth((prev) => {
+            const next = [...prev, { ...entry, id: uuidv4() }].sort((a, b) => b.date - a.date);
+            set("breastGrowth", next);
+            return next;
+        });
+    }, []);
+
+    const removeBreastGrowthEntry = useCallback((id: string) => {
+        setBreastGrowth((prev) => {
+            const next = prev.filter((e) => e.id !== id);
+            set("breastGrowth", next);
+            return next;
+        });
+    }, []);
+
+    const updateBreastGrowthEntry = useCallback((id: string, updates: Partial<BreastGrowthEntry>) => {
+        setBreastGrowth((prev) => {
+            const next = prev.map((e) => (e.id === id ? { ...e, ...updates } : e));
+            set("breastGrowth", next);
+            return next;
+        });
+    }, []);
+
     // Wig Collection
     const addWig = useCallback(async (wig: WigItem) => {
         setWigCollection((prev) => {
@@ -938,6 +1002,187 @@ export function useStore() {
         });
     }, []);
 
+    // New Feature Mutations (January 2026)
+
+    // Notifications
+    const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
+        setNotifications((prev) => {
+            const next = [...prev, { ...notification, id: uuidv4() }].sort((a, b) => b.dateCreated - a.dateCreated);
+            set("notifications", next);
+            return next;
+        });
+    }, []);
+
+    const removeNotification = useCallback((id: string) => {
+        setNotifications((prev) => {
+            const next = prev.filter((n) => n.id !== id);
+            set("notifications", next);
+            return next;
+        });
+    }, []);
+
+    const markNotificationAsRead = useCallback((id: string) => {
+        setNotifications((prev) => {
+            const next = prev.map((n) => n.id === id ? { ...n, read: true } : n);
+            set("notifications", next);
+            return next;
+        });
+    }, []);
+
+    const updateNotificationSettings = useCallback((settings: Partial<NotificationSettings>) => {
+        setNotificationSettings((prev) => {
+            const next = { ...prev, ...settings };
+            set("notificationSettings", next);
+            return next;
+        });
+    }, []);
+
+    // Tags
+    const addTag = useCallback((tag: Omit<Tag, 'id'>) => {
+        setTags((prev) => {
+            const next = [...prev, { ...tag, id: uuidv4() }];
+            set("tags", next);
+            return next;
+        });
+    }, []);
+
+    const removeTag = useCallback((id: string) => {
+        setTags((prev) => {
+            const next = prev.filter((t) => t.id !== id);
+            set("tags", next);
+            return next;
+        });
+    }, []);
+
+    const updateTag = useCallback((id: string, updates: Partial<Tag>) => {
+        setTags((prev) => {
+            const next = prev.map((t) => t.id === id ? { ...t, ...updates } : t);
+            set("tags", next);
+            return next;
+        });
+    }, []);
+
+    // Notes
+    const addNote = useCallback((note: Omit<Note, 'id'>) => {
+        setNotes((prev) => {
+            const next = [...prev, { ...note, id: uuidv4() }];
+            set("notes", next);
+            return next;
+        });
+    }, []);
+
+    const removeNote = useCallback((id: string) => {
+        setNotes((prev) => {
+            const next = prev.filter((n) => n.id !== id);
+            set("notes", next);
+            return next;
+        });
+    }, []);
+
+    const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+        setNotes((prev) => {
+            const next = prev.map((n) => n.id === id ? { ...n, ...updates, dateModified: Date.now() } : n);
+            set("notes", next);
+            return next;
+        });
+    }, []);
+
+    // Search History
+    const addSearchHistory = useCallback((search: Omit<SearchHistory, 'id'>) => {
+        setSearchHistory((prev) => {
+            const next = [...prev, { ...search, id: uuidv4() }].slice(-50); // Keep last 50
+            set("searchHistory", next);
+            return next;
+        });
+    }, []);
+
+    const clearSearchHistory = useCallback(() => {
+        setSearchHistory([]);
+        set("searchHistory", []);
+    }, []);
+
+    // Saved Searches
+    const addSavedSearch = useCallback((search: Omit<SavedSearch, 'id'>) => {
+        setSavedSearches((prev) => {
+            const next = [...prev, { ...search, id: uuidv4() }];
+            set("savedSearches", next);
+            return next;
+        });
+    }, []);
+
+    const removeSavedSearch = useCallback((id: string) => {
+        setSavedSearches((prev) => {
+            const next = prev.filter((s) => s.id !== id);
+            set("savedSearches", next);
+            return next;
+        });
+    }, []);
+
+    // Calendar Events
+    const addCalendarEvent = useCallback((event: Omit<CalendarEvent, 'id'>) => {
+        setCalendarEvents((prev) => {
+            const next = [...prev, { ...event, id: uuidv4() }];
+            set("calendarEvents", next);
+            return next;
+        });
+    }, []);
+
+    const removeCalendarEvent = useCallback((id: string) => {
+        setCalendarEvents((prev) => {
+            const next = prev.filter((e) => e.id !== id);
+            set("calendarEvents", next);
+            return next;
+        });
+    }, []);
+
+    const updateCalendarEvent = useCallback((id: string, updates: Partial<CalendarEvent>) => {
+        setCalendarEvents((prev) => {
+            const next = prev.map((e) => e.id === id ? { ...e, ...updates } : e);
+            set("calendarEvents", next);
+            return next;
+        });
+    }, []);
+
+    // Butt Plug Training & Tracking
+    const addButtPlugSession = useCallback(async (session: Omit<ButtPlugSession, 'id'>) => {
+        setButtPlugSessions((prev) => {
+            const newSession: ButtPlugSession = {
+                ...session,
+                id: uuidv4(),
+            };
+            const next = [...prev, newSession].sort((a, b) => b.startDate - a.startDate);
+            set("buttPlugSessions", next);
+            return next;
+        });
+    }, []);
+
+    const removeButtPlugSession = useCallback((id: string) => {
+        setButtPlugSessions((prev) => {
+            const next = prev.filter((s) => s.id !== id);
+            set("buttPlugSessions", next);
+            return next;
+        });
+    }, []);
+
+    const updateButtPlugSession = useCallback((id: string, updates: Partial<ButtPlugSession>) => {
+        setButtPlugSessions((prev) => {
+            const next = prev.map((s) => s.id === id ? { ...s, ...updates } : s);
+            set("buttPlugSessions", next);
+            return next;
+        });
+    }, []);
+
+    // Favorites
+    const toggleFavorite = useCallback((id: string) => {
+        setFavorites((prev) => {
+            const next = prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id];
+            set("favorites", next);
+            return next;
+        });
+    }, []);
+
+    const isFavorite = useCallback((id: string) => favorites.includes(id), [favorites]);
+
     return {
         loading,
         items,
@@ -952,12 +1197,14 @@ export function useStore() {
         colorSeason,
         chastitySessions,
         corsetSessions,
+        buttPlugSessions,
         orgasmLogs,
         arousalLogs,
         toyCollection,
         intimacyJournal,
         skincareProducts,
         clitMeasurements,
+        breastGrowth,
         wigCollection,
         hairStyles,
         makeupTutorials,
@@ -986,6 +1233,9 @@ export function useStore() {
         logHygiene,
         startCorsetSession,
         endCorsetSession,
+        addButtPlugSession,
+        removeButtPlugSession,
+        updateButtPlugSession,
         addOrgasmLog,
         removeOrgasmLog,
         addArousalLog,
@@ -1002,6 +1252,9 @@ export function useStore() {
         updateSkincareProduct,
         addClitMeasurement,
         removeClitMeasurement,
+        addBreastGrowthEntry,
+        removeBreastGrowthEntry,
+        updateBreastGrowthEntry,
         addWig,
         removeWig,
         updateWig,
@@ -1047,5 +1300,33 @@ export function useStore() {
         updateMakeupTutorial,
         removeMakeupTutorial,
         logMakeupPractice,
+        // New features (January 2026)
+        notifications,
+        addNotification,
+        removeNotification,
+        markNotificationAsRead,
+        notificationSettings,
+        updateNotificationSettings,
+        tags,
+        addTag,
+        removeTag,
+        updateTag,
+        notes,
+        addNote,
+        removeNote,
+        updateNote,
+        searchHistory,
+        addSearchHistory,
+        clearSearchHistory,
+        savedSearches,
+        addSavedSearch,
+        removeSavedSearch,
+        calendarEvents,
+        addCalendarEvent,
+        removeCalendarEvent,
+        updateCalendarEvent,
+        favorites,
+        toggleFavorite,
+        isFavorite,
     };
 }

@@ -1,11 +1,11 @@
 "use client";
 
-"use client";
-
 import { useState, useCallback } from "react";
 import { Download, Loader, AlertCircle, CheckCircle, Package } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
-import type { Category } from "@/types";
+import { toast } from "@/lib/toast";
+import type { Category, Item } from "@/types";
+import { v4 as uuidv4 } from "uuid";
 
 interface AmazonOrder {
   order_id: string;
@@ -45,7 +45,12 @@ export function AmazonOrderSync() {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch orders: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || 
+          errorData.message ||
+          `Failed to fetch orders: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -62,12 +67,19 @@ export function AmazonOrderSync() {
         demoIndicator = " (demo mode)";
       }
       
+      // Provide helpful message when no orders found
+      let message = "";
+      if (orderList.length > 0) {
+        message = `Found ${orderList.length} orders${demoIndicator}. Select items to import.`;
+      } else if (!data.demo) {
+        message = "No orders found in your Amazon account. Try: 1) Verify credentials in .env, 2) Check if account has purchase history, 3) Try demo mode (?demo=true)";
+      } else {
+        message = "No orders found";
+      }
+      
       setStatus({
-        type: orderList.length > 0 ? "success" : "idle",
-        message:
-          orderList.length > 0
-            ? `Found ${orderList.length} orders${demoIndicator}. Select items to import.`
-            : "No orders found",
+        type: orderList.length > 0 ? "success" : (data.demo ? "idle" : "error"),
+        message,
       });
 
       // Pre-select all orders
@@ -97,13 +109,16 @@ export function AmazonOrderSync() {
 
     for (const order of selectedOrdersList) {
       try {
-        // Map Amazon order to Item type
-        const item = {
+        // Map Amazon order to Item type with required fields
+        const item: Item = {
+          id: uuidv4(),
           name: order.title,
           type: inferItemType(order.category),
           category: inferCategory(order.category),
           price: order.price,
           image: order.image_url,
+          dateAdded: new Date(order.order_date).getTime(),
+          purchaseUrl: order.url,
           importMeta: {
             source: "amazon",
             order_id: order.order_id,
@@ -115,7 +130,7 @@ export function AmazonOrderSync() {
         };
 
         // Add to closet via store
-        addItem(item as any);
+        await addItem(item);
         imported++;
       } catch (err) {
         console.error(`Failed to import order ${order.order_id}:`, err);
@@ -135,12 +150,16 @@ export function AmazonOrderSync() {
       failed,
     });
 
-    // Clear selection after successful sync
-    if (failed === 0) {
+    // Show toast and clear after successful sync
+    if (imported > 0) {
+      toast.success(`Added ${imported} ${imported === 1 ? "item" : "items"} to closet`);
       setTimeout(() => {
         setOrders([]);
         setSelectedOrders(new Set());
       }, 2000);
+    }
+    if (failed > 0) {
+      toast.error(`Failed to import ${failed} ${failed === 1 ? "item" : "items"}`);
     }
   }, [orders, selectedOrders, addItem]);
 
@@ -176,22 +195,22 @@ export function AmazonOrderSync() {
 
       {/* Demo Data Info */}
       {isDemo && orders.length > 0 && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
           <div className="flex gap-3">
-            <div className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5">ℹ️</div>
-            <div className="text-sm text-blue-900 dark:text-blue-200 flex-1">
-              <p className="font-semibold mb-2">📦 Demo Mode - Sample Items</p>
-              <p className="mb-3">You&apos;re viewing {orders.length} demo items. These help you test the sync feature without needing Amazon account setup.</p>
-              <p className="mb-3 text-xs">To import your <strong>real Amazon orders</strong> instead:</p>
-              <div className="bg-blue-100 dark:bg-blue-900/50 rounded p-2 mb-3 text-xs font-mono space-y-1">
-                <div>1. bash setup-amazon-sync.sh  <span className="text-blue-600">(or .bat on Windows)</span></div>
-                <div>2. Set AMAZON_EMAIL in .env</div>
-                <div>3. Run: uvicorn api-adapter.adapter:app --reload --port 8001</div>
-                <div>4. Update .env: RETAILER_ADAPTER_URL=http://localhost:8001</div>
-                <div>5. npm run dev</div>
+            <div className="text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5">⚠️</div>
+            <div className="text-sm text-orange-900 dark:text-orange-200 flex-1">
+              <p className="font-semibold mb-2">🔧 Production Mode - Adapter Not Connected</p>
+              <p className="mb-3">You&apos;re viewing {orders.length} demo items because the Python adapter is not running.</p>
+              <p className="mb-3 text-xs">To import your <strong>real Amazon orders</strong>:</p>
+              <div className="bg-orange-100 dark:bg-orange-900/50 rounded p-2 mb-3 text-xs font-mono space-y-1">
+                <div>1. bash setup-amazon-sync.sh  <span className="text-orange-600">(or .bat on Windows)</span></div>
+                <div>2. Set AMAZON_EMAIL &amp; AMAZON_PASSWORD in .env</div>
+                <div>3. Terminal: <code>uvicorn api-adapter.adapter:app --reload --port 8001</code></div>
+                <div>4. Reload the app (Ctrl+R)</div>
+                <div>5. Click "Fetch My Amazon Orders" again</div>
               </div>
               <p className="text-xs">
-                <a href="https://github.com/search?q=amazon-mcp" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-300 underline hover:text-blue-800">
+                <a href="https://github.com/Jennifersmith2021/aura#amazon-sync" target="_blank" rel="noopener noreferrer" className="text-orange-600 dark:text-orange-300 underline hover:text-orange-800">
                   View detailed setup guide →
                 </a>
               </p>
@@ -200,7 +219,64 @@ export function AmazonOrderSync() {
         </div>
       )}
 
-      {/* Status Messages */}
+      {/* Error with Setup Instructions */}
+      {status.type === "error" && status.message.includes("Failed to fetch") && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="flex gap-3">
+            <div className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5">🚨</div>
+            <div className="text-sm text-red-900 dark:text-red-200 flex-1">
+              <p className="font-semibold mb-2">Production Mode: Adapter Not Connected</p>
+              <p className="mb-3">The Python adapter (required for real Amazon orders) is not running.</p>
+              <p className="mb-3 text-xs font-medium">Quick Setup:</p>
+              <div className="bg-red-100 dark:bg-red-900/50 rounded p-3 mb-3 text-xs font-mono space-y-2 text-foreground dark:text-foreground">
+                <div><strong># Terminal 1: Start adapter</strong></div>
+                <div className="ml-3">$ bash setup-amazon-sync.sh</div>
+                <div className="ml-3">$ uvicorn api-adapter.adapter:app --reload --port 8001</div>
+                <div className="mt-2"><strong># Terminal 2: Start dev server</strong></div>
+                <div className="ml-3">$ npm run dev</div>
+              </div>
+              <p className="text-xs text-red-800 dark:text-red-300 mb-2">
+                Make sure <code className="bg-red-100 dark:bg-red-900/50 px-1 rounded">AMAZON_EMAIL</code> and <code className="bg-red-100 dark:bg-red-900/50 px-1 rounded">AMAZON_PASSWORD</code> are set in <code className="bg-red-100 dark:bg-red-900/50 px-1 rounded">.env</code>
+              </p>
+              <p className="text-xs">
+                <a href="https://github.com/Jennifersmith2021/aura/blob/main/AMAZON_SYNC_QUICK_START.md" target="_blank" rel="noopener noreferrer" className="text-red-600 dark:text-red-300 underline hover:text-red-800">
+                  📖 Full setup guide →
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Info: No Orders Found (Adapter Working) */}
+      {status.type === "error" && status.message.includes("No orders found") && !status.message.includes("Failed to fetch") && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex gap-3">
+            <div className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5">ℹ️</div>
+            <div className="text-sm text-blue-900 dark:text-blue-200 flex-1">
+              <p className="font-semibold mb-2">Adapter Connected, But No Orders Found</p>
+              <p className="mb-3">The Amazon adapter is running, but returned 0 orders. This usually means:</p>
+              <ul className="list-disc list-inside space-y-1 mb-3 text-xs">
+                <li>Your Amazon account has no order history</li>
+                <li>The credentials in .env are incorrect</li>
+                <li>Amazon requires 2FA (not supported by automation)</li>
+                <li>Amazon is blocking automated access</li>
+              </ul>
+              <p className="mb-3 text-xs font-medium">Troubleshooting steps:</p>
+              <div className="bg-blue-100 dark:bg-blue-900/50 rounded p-3 mb-3 text-xs font-mono space-y-2 text-foreground">
+                <div>1. Verify credentials: Check .env file has correct AMAZON_EMAIL and AMAZON_PASSWORD</div>
+                <div>2. Test login manually: Open amazon.com and try logging in with those credentials</div>
+                <div>3. Check for 2FA: If 2FA is enabled on your Amazon account, disable it temporarily</div>
+                <div>4. Try demo mode: Add <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">?demo=true</code> to URL to test with sample data</div>
+              </div>
+              <p className="text-xs">
+                <strong>Alternative:</strong> Use Amazon's "Download Order History Reports" feature and import via CSV instead.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {status.message && (
         <div
           className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
@@ -404,16 +480,16 @@ function inferCategory(category?: string): Category {
   const cat = category.toLowerCase();
 
   // Makeup categories
-  if (cat.includes("makeup")) return "makeup";
   if (cat.includes("lipstick")) return "lip";
   if (cat.includes("eyeshadow") || cat.includes("eyeliner")) return "eye";
   if (cat.includes("foundation") || cat.includes("concealer")) return "face";
   if (cat.includes("mascara")) return "eye";
   if (cat.includes("blush") || cat.includes("bronzer")) return "cheek";
+  if (cat.includes("makeup")) return "face"; // Generic makeup defaults to face
 
-  // Skincare
-  if (cat.includes("skincare") || cat.includes("lotion")) return "skincare";
-  if (cat.includes("facial")) return "skincare";
+  // Skincare - map to closest category
+  if (cat.includes("skincare") || cat.includes("lotion")) return "other";
+  if (cat.includes("facial")) return "other";
 
   // Clothing
   if (cat.includes("dress")) return "dress";
