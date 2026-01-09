@@ -645,7 +645,262 @@
 
 ---
 
+## 🌤️ Weather Integration (`/studio` → Looks tab enhancement)
+
+**Purpose**: Get weather-aware outfit suggestions based on current/forecasted conditions.
+
+### Features
+- **Auto-detect location**: Browser geolocation API (with fallback to manual entry)
+- **Real-time weather**: Current temp, humidity, wind, UV index, precipitation
+- **Outfit suggestions**: AI recommends outfits for today's weather
+- **7-day forecast**: Weather-aware outfit plans for the week
+- **Layering guide**: Smart suggestions for temperature swings
+- **Rain protection**: Alert when rain expected, suggest waterproof items
+- **Color palette matching**: Suggest outfits that match weather mood (cozy for cold, bright for sunny)
+
+### Data Persistence
+- Weather data cached (1-hour TTL)
+- Weather-outfit suggestions cached in `looks` metadata
+- User location preference stored in settings
+
+### API Integration
+- Uses free weather API (OpenWeatherMap or similar)
+- Gemini integration for AI outfit recommendations
+
+---
+
+## 💰 Cost-Per-Wear Analytics (`/studio` → Stats tab enhancement)
+
+**Purpose**: Track value and ROI on wardrobe items.
+
+### Features
+- **Cost-per-wear calculation**: Item price ÷ times worn in looks
+- **Value ranking**: Identify best investments vs. unused items
+- **Price paid tracking**: Extend Item type with purchase price
+- **Wear frequency**: Auto-calculate from looks containing the item
+- **Break-even analysis**: Days/wears until item pays for itself
+- **Trend visualization**: Cost-per-wear over time as items get more use
+- **Recommendations**: AI suggests which items to wear more for better ROI
+
+### Data Storage
+- Price data stored in existing `Item.price` field
+- Wear counts calculated from `looks` array
+- Analytics cached for 24 hours
+
+### Dashboard Components
+- Top 10 best value items (lowest cost-per-wear)
+- Top 10 unused items (highest cost-per-wear)
+- Average cost-per-wear trend chart (last 6 months)
+- ROI targets: Set daily/monthly wearing goals
+
+---
+
+## 🎯 Advanced Affirmation System (`/studio` → Journey tab enhancement)
+
+**Purpose**: Mood-aware, personalized affirmations with streak tracking.
+
+### Features
+- **Mood tracking**: Prompt user for current mood (happy, confident, anxious, sad, motivated, etc.)
+- **Affirmation matching**: Serve affirmations based on mood and color season
+- **Streak counter**: Days in a row reading an affirmation (visual badge)
+- **Favorite collections**: Build personal affirmation libraries
+- **Custom affirmations**: Users can create and save personal affirmations
+- **Scheduled affirmations**: Get daily affirmations at custom time (7am default)
+- **Affirmation reminders**: Browser notifications for new affirmations
+- **Progress chart**: Visual representation of mood trends over time
+
+### Data Persistence
+- Affirmations: `affirmations` key (existing)
+- Mood logs: new `moodLogs` key (date, mood, affirmationId)
+- Streaks: track in user settings
+- Custom affirmations: extend `affirmations` schema
+
+### API Integration
+- Gemini generates personalized affirmations based on user profile
+- Mood analytics powered by `analytics` library
+
+---
+
+## 📦 Item Condition Tracker (`/closet` enhancement)
+
+**Purpose**: Track garment health, wear & tear, and maintenance needs.
+
+### Features
+- **Condition rating**: 5-star condition scale (like-new → needs-repair)
+- **Wear pattern tracking**: High-use items vs. special occasion
+- **Damage log**: Document stains, tears, stretching, color fading
+- **Maintenance history**: Record cleanings, repairs, alterations
+- **Care instructions**: AI extracts/suggests care instructions from brand
+- **Expiration predictions**: Estimate lifespan remaining (e.g., "~2 years left at current wear")
+- **Warning alerts**: Notify when item condition drops below threshold
+- **Repair recommendations**: AI suggests when to repair vs. replace
+- **Before/after photos**: Document condition over time
+
+### Data Persistence
+- Condition tracking stored in extended `Item` type (new fields: `condition`, `damageLog`, `maintenanceLog`)
+- Condition history: separate `itemCondition` IndexedDB key
+- Alerts configured in settings
+
+### Dashboard Features
+- Items needing attention (repairs, cleaning, etc.)
+- Best-preserved items (collect rarely-used pieces)
+- Condition heatmap: Color-coded items by condition status
+
+---
+
+## 📊 Wardrobe Health Dashboard (`/studio` → Stats tab new section)
+
+**Purpose**: Holistic view of wardrobe strengths, gaps, and opportunities.
+
+### Features
+- **Gap analysis**: Identify missing categories (no black blazer? suggest one)
+- **Color balance**: Pie chart showing color distribution, flag over/under-represented colors
+- **Seasonal readiness**: Check for adequate warm-weather and cold-weather items
+- **Style cohesion score**: Percentage indicating how well items mix-and-match (based on colors, fits, occasions)
+- **Underutilized items**: Identify pieces worn < 2 times
+- **Quick wins**: AI suggests 3-5 affordable pieces that would maximize outfits
+- **Trend analysis**: Most-used categories, colors, styles (last 30/90/365 days)
+- **Occasion coverage**: Ensure adequate casual, business, formal, athletic, sleepwear
+- **Duplicate detection**: Flag similar items (2 identical black tees, warn about redundancy)
+
+### Data Calculations
+- Gap analysis: Compare items against "essentials" checklist
+- Color balance: `Item.color` value counts
+- Style cohesion: Outfit success rate (looks with 4+ items) vs. failures
+- Trend analysis: frequency of items in `looks` with date filtering
+
+### Visualizations
+- Radar chart: Style breadth (7 axes: casual, business, formal, athletic, lounge, sleepwear, special)
+- Sunburst chart: Item categories and subcategories
+- Timeline: Monthly additions vs. removals
+- Heatmap: Which color-category combos are underused
+
+---
+
+## 👥 Social Outfit Sharing (`/studio` → Social tab enhancement)
+
+**Purpose**: Share looks with friends, get feedback, discover new styles.
+
+### Features
+- **Look sharing links**: Generate shareable links for specific looks
+- **Embed code**: Snippet for embedding on blogs or social media
+- **Friend network**: Add friends, view their public looks
+- **Outfit ratings**: Rate friends' looks (1-5 stars with optional comment)
+- **Comment threads**: Discuss specific looks with detail (colors, fit, occasion)
+- **Trending looks**: Leaderboard of most-liked community outfits
+- **Style discovery**: Algorithm suggests friends with similar color seasons or styles
+- **Outfit challenges**: Create group challenges (e.g., "Monochrome look this week")
+- **Permission levels**: Public/private/friends-only for individual looks
+
+### Data Persistence
+- Social metadata: new `socialLook` key for shares, ratings, comments
+- Friend list: new `socialFriends` key
+- Comments: nested in look object or separate `lookComments` key
+- Challenge participation: extend `challenges` type
+
+### Authentication
+- Unique share tokens for each look (generated with crypto.randomUUID)
+- Friend requests and accept/deny workflow
+- Session-based access control (friend-only views require login)
+
+---
+
+## 🛒 Smart Shopping Assistant (`/shopping` enhancement)
+
+**Purpose**: Price tracking, sale alerts, duplicate detection, and smart recommendations.
+
+### Features
+- **Price history tracking**: Track item prices over time across retailers
+- **Sale alerts**: Notify when wishlist items go on sale
+- **Price comparison**: Show same item across multiple retailers
+- **Duplicate detection**: Warn if adding same item to wishlist twice
+- **Smart recommendations**: "You own this top, consider these bottoms" (based on closet)
+- **Budget tracking**: Set monthly budget and track against wishlist spend
+- **Seasonal sale calendar**: Predict when sales happen (summer 4th of July, etc.)
+- **One-click checkout**: Save payment methods and addresses (optional server-side)
+- **AI personal shopper**: Gemini analyzes closet gaps and suggests items
+
+### Data Persistence
+- Price history: new `priceHistory` key
+- Wishlist metadata: extend `shoppingItem` with `priceAdded`, `priceHistory`, `saleNotification`
+- Budget settings: user preferences
+- Alert history: track which sales have been notified
+
+### API Integration
+- Price tracking queries retailers daily (cached)
+- Email/push notifications when prices drop
+- Gemini generates shopping recommendations
+
+---
+
+## 📅 Calendar Integration & Event Planning (`/studio` → new tab)
+
+**Purpose**: Plan outfits for upcoming events and occasions.
+
+### Features
+- **Event calendar**: Create events (birthdays, meetings, dates, parties, weddings)
+- **Event outfit planning**: Assign outfit to each event (must-haves for that date)
+- **Look suggestions**: AI suggests outfits based on event type (casual, business, formal, date night)
+- **Time-based outfit prep**: Get notifications 3 days before important events
+- **Holiday outfit planner**: Pre-plan holiday looks (Christmas, NYE, Valentine's, etc.)
+- **Work week planner**: Plan 5 business outfits on Sunday (quick start for week)
+- **Travel packing**: Link packing list to trip dates, auto-suggest vacation looks
+- **Recurring events**: Automate outfit planning for regular meetings/activities
+
+### Data Persistence
+- Events: new `calendarEvents` IndexedDB key
+- Event-outfit links: stored in event object
+- Notification preferences: user settings
+- Recurring rules: stored with event
+
+### Integrations
+- Google Calendar sync (optional, read-only)
+- iCal export for external calendar apps
+- Gemini for smart outfit suggestions based on event
+
+---
+
+## 🎁 Wardrobe Planner & Capsules (`/studio` → Looks tab enhancement)
+
+**Purpose**: Organize looks into seasonal/travel capsules and plan ahead.
+
+### Features
+- **Capsule collections**: Group related looks (Summer 2025, Business Casual, etc.)
+- **Seasonal planning**: Auto-suggest warm/cool season looks based on calendar
+- **Travel capsules**: Plan 2-week trips with essential outfits (minimal packing)
+- **Outfit formulas**: Save outfit templates (e.g., "blazer + jeans + heels")
+- **Recurring outfits**: Mark outfits for repeated wear (uniform idea)
+- **Monthly themes**: Plan monthly style themes (e.g., "All Denim March")
+- **Minimal wardrobe challenge**: Track days with outfit repeats to challenge yourself
+- **Capsule analytics**: See which capsule items get most wear
+- **Export capsule**: PDF/image export for printing or sharing
+
+### Data Persistence
+- Capsules: new `warprobeCapsules` IndexedDB key
+- Capsule membership: link looks to capsules
+- Capsule templates: save recurring patterns
+- Challenge streaks: stored in settings or `challenges` key
+
+### Visualizations
+- Capsule calendar: Show which capsule active per month
+- Capsule size pie chart: Items per capsule
+- Usage heatmap: Which capsule looks used most
+
+---
+
 ## 🚀 Remaining Work (Priority Roadmap)
+
+### Tier 0: NEW FEATURES (Just Added)
+1. ✅ **Weather Integration** — Get weather-aware outfit suggestions
+2. ✅ **Cost-Per-Wear Analytics** — Track ROI on wardrobe items
+3. ✅ **Advanced Affirmation System** — Mood-aware affirmations with streaks
+4. ✅ **Item Condition Tracker** — Track garment health and maintenance
+5. ✅ **Wardrobe Health Dashboard** — Gap analysis and style metrics
+6. ✅ **Social Outfit Sharing** — Share looks with friends and get feedback
+7. ✅ **Smart Shopping Assistant** — Price tracking, sales alerts, recommendations
+8. ✅ **Calendar Integration** — Plan outfits for upcoming events
+9. ✅ **Wardrobe Planner & Capsules** — Organize looks into seasonal/travel collections
+10. ✅ **Advanced AI Recommendations** — Context-aware outfit suggestions (see features 1, 5, 8, 9)
 
 ### Tier 1: Core Infrastructure (Recommended Next)
 1. **Full Data Sync** — Extend `/api/sync/all` to sync all 30+ data types (not just items)
@@ -665,8 +920,8 @@
 
 ### Tier 2: Experience Enhancements
 4. **Offline Mode** — Service Worker for full offline functionality
-5. **Smart Recommendations** — AI learns preferences over time
-6. **Social Features** — Share achievements, join group challenges
+5. **Advanced Recommendations** — AI learns preferences over time
+6. **Extended Social Features** — Share achievements, join group challenges
 7. **Mobile App** — React Native wrapper for app stores
 8. **CI/CD Pipeline** — GitHub Actions for auto-deploy on push
 
